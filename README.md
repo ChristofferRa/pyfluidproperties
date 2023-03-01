@@ -1,143 +1,171 @@
 # pyfluidproperties
 Thermodynamic properties of fluids in python
-
 pyfluidproperties is a library of fluid properties for different fluids.
-All fluid-class:es is extension of the fluid_prop class and share the same syntax and basic properties. 
-Using the same syntax for all fluids it is easy to change fluid in a calculation.
 
-## Available fluids:
+### Available fluids:
 - Water (IAPWSIF-97 extended with SR2-01,SR3-03,SR4-04,SR5-05, R12-08, R15-11 etc.)
 
 At the moment the only available fluid is water, but the aim is to extend the library with more fluids.
 Ex. Nitrogen, Air, Hydrogen etc.
 
 ### Basic properties:
-      Description                         Unit        Letter
-    - Pressure                            (Pa)        p
-    - Temperature                         (K)         T,t
-    - Specific Volume                     (m^3/kg)    v
-    - Specific Enthalpy                   (J/kg)      h   
-    - Specific Internal Energy            (J/kg)      u
-    - Specific Entropy                    (J/kg/K)    s
-    - Specific Isobaric heat capacity     (J/kg/K)    cp
-    - Specific Isochoric heat capacity    (J/kg/K)    cv
-    - Speed of sound                      (m/s)       w 
-    - Vapor mass fraction                 (-)         x
-    - Dynamic Viscosity                   (Pa*s)      my
-    - Thermal Conductivity                (W/m/K)     tc
-    - Surface Tension                     (N/m)       st
+The following basic properties are available. 
+Presented in SI-unit. Other unit-systems are available, see Unit-system chapter.
+| Description                       | Unit      | Letter    |
+| ------                            | ------    | ------    |
+|Pressure                           | Pa        | p         |
+|Temperature                        | K         | T,t       |
+|Specific Volume                    | m^3/kg    | v         |
+|Specific Enthalpy                  | J/kg      | h         |  
+|Specific Internal Energy           | J/kg      | u         |
+|Specific Entropy                   | J/kg/K    | s         |
+|Specific Isobaric heat capacity    | J/kg/K    | cp        |
+|Specific Isochoric heat capacity   | J/kg/K    | cv        |
+|Speed of sound                     | m/s       | w         |
+|Vapor mass fraction                | -         | x         |
+|Dynamic Viscosity                  | Pa*s      | my        |
+|Thermal Conductivity               | W/m/K     | tc        |
+|Surface Tension                    | N/m       | st        |
+   
+## Usage
+A short introduction to using pyfluidproperties.
+### getting it
+```
+$ pip install pyfluidproperties
+```
+### Workflow
+##### Importing:
+```
+from pyfluidproperties import properties
+```
+##### Initializing:
+```
+# Initialize object by choosing fluid and unit-system
+fluid = properties(fluid = "H2O", unit_system = 'SI_bar_kj')
+```
+##### Update fluid state:
+```
+# p = 10 bar(a), T = 200 degC
+fluid.update(p = 10, T = 200)
+print(fluid)
+```
+##### Output:
+```
+Fluid:			Water (H2O)
+Unit system:	SI_bar_kj
 
-### Syntax:
-Use either as an object containing all the properties or access them individually using the provided static functions. 
-The syntax for static functions is inspired by xSteam excel-library (https://xsteam.sourceforge.net/).
+Pressure,		p = 10.000000	bar(a)
+Temperature,	T = 200.000000	degC
 
-#### As and object:
-       update_pt(p, t)
-       update_px(p, x)
-       update_ph(p, h)
-       update_ps(p, s)
-       
-#### Static functions:
-       *_pt - properties
-       v_pt(p, t)
-       h_pt(p, t)
-       u_pt(p, t)
-       s_pt(p, t)
-       cp_ptv
-       cv_pt(p, t)
-       w_pt(p, t)
-       rho_pt(p, t)
-       my_pt(p, t)
-       tc_pt(p, t)
-   
-       *_ph - properties
-       v_ph(p, h)
-       u_ph(p, h)
-       s_ph(p, h)
-       cp_ph(p, h)
-       cv_ph(p, h)
-       w_ph(p, h)
-       rho_ph(p, h)
-       my_ph(p, h)
-       tc_ph(p, h)
-   
-       *_ps - properties
-       v_ps(p, s)
-       h_ps(p, s)
-       u_ps(p, s)
-       cp_ps(p, s)
-       cv_ps(p, s)
-       w_ps(p, s)
-       rho_ps(p, s)
-       my_ps(p, s)
-       tc_ps(p, s)
-   
-       *_hs - properties
-       v_hs(h, s)
-       u_hs(h, s)
-       cp_hs(h, s)
-       cv_hs(h, s)
-       w_hs(h, s)
-       rho_hs(h, s)
-       my_hs(h, s)
-       tc_hs(h, s)
-   
-       Temperature, pressure, enthalpy backward functions
-       T_ph(p, h)
-       T_ps(p, s)
-       T_hs(h, s)
-       
-       Tsat_p(p)
-       Tsat_hs(h, s)
-       
-       psat_t(t)
-       psat_s(s)
-       psat_hs(h, s)
-       
-       p_hs(h, s)
-       
-       h_tx(t, x)
-       h_px(p, x)
-       h_prho(p, rho)
-       
-       s_tx(t, x)
-       s_px(p, x)
-   
-       Vapor Mass fractions
-       x_ph(p, h)
-       x_ps(p, s)
-       x_hs(h, s)
-   
-       Vapor Volume fractions
-       vx_ph(p, h)
-       vx_ps(p, s)
-       vx_hs(h, s)
-   
-       Saturation properties, Liquid and Vapor
-           x pressure
-           hL_p(p),     hV_p(p)
-           sL_p(p),     sV_p(p)
-           rhoV_p(p),   rhoL_p(p)
-           uV_p(p),     uL_p(p)
-           CpV_p(p),    CpL_p(p)
-           CvV_p(p),    CvL_p(p)
-           wV_p(p),     wL_p(p)
-           tcL_p(p),    tcV_p(p)
-           myL_p(p),    myV_p(p)
-       
-           x temperature
-           hL_T(t),     hV_T(t)
-           sL_T(t),     sV_T(t)
-           vL_T(t),     vV_T(t)
-           uL_T(t),     uV_T(t)
-           CpL_T(t),    CpV_T(t)
-           CvL_T(t),    CvV_T(t)
-           wL_T(t),     wV_T(t)
-           rhoV_T(t),   rhoL_Ts(t)
-           tcL_T(t),    tcV_T(t)
-           myL_T(t),    myV_T(t)
-           
-        Misc
-        st_t(t)
-        st_p(p)
-   
+region =	2
+
+Specific Volume,						v  =		0.20600364978		m^3/kg
+Specific Enthalpy,						h  =		2828.26753759806	kJ/kg
+Specific Internal Energy,				u  =		2622.26388781406	kJ/kg
+Specific Entropy,						s  =		6.69548824267		kJ/kg/C
+Specific Isobaric heat capacity,		cp =		2.42884622458	kJ/kg/C
+Specific Isochoric heat capacity,		cv =		1.75261905115		kJ/kg/C
+Speed of sound,							w  =		517.31561087015		m/s
+Vapor mass fraction,					x  =		1.00000000000		(-)
+Dynamic Viscosity,						my =		0.00001587601		Pa*s
+Thermal Conductivity,					tc =		0.03631225226		W/m/K
+Surface Tension,						st =		nan		N/m
+```
+##### Accessing properties
+Accessing property value with: fluid_object.*, replace * with one of the basic property letters:
+```
+# Calculating dynamic pressure
+v = 10 # m/s
+p_dyn = 0.5*fluid.rho*v**2
+```
+##### Calculating a single property
+Calculate and use single properties with "get_*"-functions, just change * to one of the basic properties letters:
+```
+# Enthalpy for saturated steam at p = 5 bar(a)
+h = fluid.get_h(p = 5, x = 1.0)
+```
+
+### Available functions
+Use either as an object containing all the properties or access them individually using the provided get_* functions. Each function should be called with two keywords to define a fluid state. Valid combination depends on function, all possible combinations are presented for each function below.
+##### Valid keywords
+| Keyword  | Description|
+| ------    | ------    |
+|p          | Pressure  |
+|T          | Temperature  |
+|h          | Enthalpy  |
+|x          | Mass fraction Steam  |
+|rho          | Density  |
+##### As and object, Calculate all properties at once
+Update intialized object with all fluid properties for a new fluid state
+*.update_pt(kwargs).
+###### Valid keyword-combinations
+p-T, p-h, p-s, h-s, p-x, T-x
+###### Ex:
+```
+fluid.update_pt(p = 5, h = 500)
+```
+
+##### .get_* functions, Calculate Individual properties
+Calculate invidual properties using these functions and keyword combinations. 
+For saturation properties use x = 0.0 for liquid and x = 1.0 for vapor.
+| Function  | Description               | p-T   | p-h   | p-s   | p-rho | h-s   | p-x | T-x |
+| ------    | ------                    | ---   | ---   | ---   | ---   | ---   | --- | --- |
+|*.get_v    | Specific Volume           | x     | x     | x     | -     | x     | x | x  |
+|*.get_h    | Enthalpy                  | x     | -     | x     | x     | -     | x | x |
+|*.get_u    | Internal Energy           | x     | x     | x     | -     | x     | x | x  |
+|*.get_s    | Entropy                   | x     | x     | -     | -     | x     | x | x  |
+|*.get_cp   | Isobaric heat capacity    | x     | x     | x     | -     | x     | x | x  |
+|*.get_cv   | Isochoric heat capacity   | x     | x     | x     | -     | x     | x | x  |
+|*.get_w    | Speed of sound            | x     | x     | x     | -     | x     | x | x  |
+|*.get_rho  | Density                   | x     | x     | x     | -     | x     | x | x  |
+|*.get_my   | Dynamic Viscosity         | x     | x     | x     | -     | x     | x | x  |
+|*.get_tc   | Thermal Conductivity      | x     | x     | x     | -     | x     | x | x  |
+|*.get_st   | Surface Tension           | p     | T     | -     | -     | -     | - | - | 
+|*.get_x    | Vapor mass fraction       | -     | x     | x     | -     | x     | - | -  |
+|*.get_vx   | Vapor volume fraction     | -     | x     | x     | -     | x     | - | -  |
+|*.get_T    | Temperature               | -     | x     | x     | -     | x     | x | -  |
+|*.get_p    | Pressure                  | -     | x     | x     | -     | x     | - | x  |
+
+###### Ex: Viscosity at 5 bar(a) and 500 kJ/kg
+```
+my = fluid.my(p = 5, h = 500)
+```
+### Unit systems
+Several different unit systems are supported. Unit-system is choosen when object is initialized with "unit_system"-keyword. 
+
+##### Available unit systems
+| Description                       | Unit      |  Unit   | Unit |
+| ------                            | ------    | ------    | ------    |
+| Unit-system                       | SI      |  SI_bar_kj   | US |
+| Pressure                           | Pa        | bar(a)    | psia
+| Temperature                        | K         | C         | F
+| Specific Volume                    | m^3/kg    | m^3/kg    | ft^3/lbs
+| Specific Enthalpy                  | J/kg      | kJ/kg     | Btu/lbm
+| Specific Internal Energy           | J/kg      | kJ/kg     | Btu/lbm
+| Specific Entropy                   | J/kg/K    | kJ/kg/C   | Btu/lbm/R
+| Specific Isobaric heat capacity    | J/kg/K    | kJ/kg/C   | Btu/lbm/R
+| Specific Isochoric heat capacity   | J/kg/K    | kJ/kg/C   | Btu/lbm/R
+| Speed of sound                     | m/s       | m/s       | ft/s
+| Vapor mass fraction                | -         | -         | -
+| Dynamic Viscosity                  | Pa*s      | Pa*s      | lb*s/ft^2
+| Thermal Conductivity               | W/m/K     | W/m/K     | Btu/h/ft/F
+| Surface Tension                    | N/m       | N/m       | lb/inch
+
+###### Ex: Initializing Water with US-units:
+```
+fluid = properties(fluid = "H2O", unit_system = 'US')
+```
+
+### Verification, Validation and accuracy
+Performed validations are described here. All validation test can be found in the "validation"-folder of this repository. Calculated fluid states are compared to NIST-Webbook if available.
+#### Water - IAPWSIF-97
+##### Verification
+Water properties using IAPWIF97 is validated against verification-tables available in IAPWSIF97-releases. All provided validation tables in used IAPWSIF-releases match calculated values with pyfluidproperties. With the following exceptions:  
+- Viscosity: Tables with "critical enhancement" near the critical point. 
+- Thermal Conductivity near the critical point.
+
+The difference is very small. The method for calculating Viscosity only provides verification-tables calculated with IAPWSIF95. pyfluidprop uses IAPWSIF97 which has lower accuracy compare to IAPWSIF95. The difference for Thermal conductivity is explaind by different methods for calculating the derivative drho/dp. 
+##### Validation and accuracy
+About 2000 fluid states spread out over the applicability range of IAPWSIF97, from 0.1 to 100 MPa and 300 to 2000 K, is compared to NIST (IAPWSIF95). The maximum error for each property is checked. 
+To be continued...
+

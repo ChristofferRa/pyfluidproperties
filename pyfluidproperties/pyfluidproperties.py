@@ -3,7 +3,7 @@
 Main class for pyfluidproperties library. 
 
 Initialize fluid and unit-system.
-Returning corresponding fluid class
+Access corresponding fluid class and do conversions
 
 List of functions and code structure for pyfluidproperties class:
     Init functions:
@@ -29,7 +29,6 @@ List of functions and code structure for pyfluidproperties class:
         get_vx(self, **kwargs)
         get_T(self, **kwargs)
         get_p(self, **kwargs)
-        get_psat(self, **kwargs)
     
     Misc:
         set_properties(self,properties_dict)
@@ -43,12 +42,12 @@ from iapwsif97_class import iapwsif97
 from unit_system_converter import unit_conv
 import numpy as np
 
-class pyfluidproperties:
+class properties:
     """
     Main class for pyfluidproperties library. 
 
     Initialize fluid and unit-system.
-    Returning corresponding class
+    Access corresponding fluid class and do conversions 
     """
     
     def __init__(self, **kwargs):
@@ -79,10 +78,10 @@ class pyfluidproperties:
                 unit_system = arg
         
         # Check for enough and valid inputs, otherwhise abort...
-        if fluid not in pyfluidproperties.get_fluids():
+        if fluid not in properties.get_fluids():
             raise Exception(f'"{fluid}" is not a valid input for "fluid = "')
             
-        if unit_system not in pyfluidproperties.get_unit_systems():
+        if unit_system not in properties.get_unit_systems():
             raise Exception(f'"{unit_system}" is not a valid input for "unit_system ="')
         
         # If all good, set fluid and unit_system
@@ -91,7 +90,7 @@ class pyfluidproperties:
         
         # Init converter class and fluid class
         self.unit_converter = unit_conv(unit_system)
-        pyfluidproperties.init_fluid(self)
+        properties.init_fluid(self)
             
     
     def init_fluid(self, p = 1.013*1e5, t = 20+273.15):
@@ -118,8 +117,22 @@ class pyfluidproperties:
             print('No valid fluid specified')
             self.fluid_class = None
         
-        return self.fluid_class
-    
+        # Set default properties
+        properties.set_properties(self, {'p': self.fluid_class.p,
+                                                'T': self.fluid_class.T,
+                                                'v': self.fluid_class.v,
+                                                'h': self.fluid_class.h,
+                                                'u': self.fluid_class.u,
+                                                's': self.fluid_class.s,
+                                                'cp': self.fluid_class.cp,
+                                                'cv': self.fluid_class.cv,
+                                                'w': self.fluid_class.w,
+                                                'rho': self.fluid_class.rho,
+                                                'x': self.fluid_class.x,
+                                                'my': self.fluid_class.my,
+                                                'tc': self.fluid_class.tc,
+                                                'st': self.fluid_class.st})
+        
     def update(self, **kwargs):
         """
         Update function, converts and updates fluid class
@@ -184,7 +197,7 @@ class pyfluidproperties:
             raise Exception('Not enough input arguments or inputarguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
         
         # Convert fluid-class properties from SI to specified units system
-        pyfluidproperties.set_properties(self, {'p': self.fluid_class.p,
+        properties.set_properties(self, {'p': self.fluid_class.p,
                                                 'T': self.fluid_class.T,
                                                 'v': self.fluid_class.v,
                                                 'h': self.fluid_class.h,
@@ -306,7 +319,7 @@ class pyfluidproperties:
             elif key == 'x':
                 x = arg
             else:
-                raise Exception(f'{key} is not a valid keyword, Valid keywords: p, T,h, s')
+                raise Exception(f'{key} is not a valid keyword, Valid keywords: p, T, h, s')
                 
         # Identify valid combination of kwargs and call corresponding fluid-class function
         if 'p' in kwargs.keys():
@@ -1164,53 +1177,10 @@ class pyfluidproperties:
         Parameters
         ----------
         kwargs:
-        h:      double      Entropy     (valid unit in selected unit system)
-        s:      double      Entropy     (valid unit in selected unit system)
-
-        Returns
-        -------
-        None.
-
-        """
-        # init
-        h = np.nan
-        s = np.nan
-        
-        p = np.nan
-        
-        # Read convert and set kwargs, ignore onces not defined
-        # Inputs converted to SI for use by fluid-class
-        for key, arg in kwargs.items():
-            if key == 'h':
-                h = self.unit_converter.convert(arg, prop = 'h', to_from = 'to_SI')
-            elif key == 's':
-                s = self.unit_converter.convert(arg, prop = 's', to_from = 'to_SI')
-            else:
-                raise Exception(f'{key} is not a valid keyword, Valid keywords: h, s')
-                
-        # Identify valid combination of kwargs and call corresponding fluid-class function
-        if 'h' in kwargs.keys():
-            if 's' in kwargs.keys():
-                # h-s
-                p = self.fluid_class.p_hs(h, s)
-            else:
-                raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: h-s')
-        else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: h-s')
-        
-        # Convert from SI to specified units system
-        return self.unit_converter.convert(p,prop = 'p', to_from = 'from_SI')
-    
-    def get_psat(self, **kwargs):
-        """
-        calls fluid class for saturation pressure and returns results in choosen units.
-
-        Parameters
-        ----------
-        kwargs:
         T :     double,     Temperature (valid unit in selected unit system)
         h:      double      Entropy     (valid unit in selected unit system)
         s:      double      Entropy     (valid unit in selected unit system)
+        x:      double      Mass-fraction steam (-)
 
         Returns
         -------
@@ -1221,36 +1191,48 @@ class pyfluidproperties:
         T = np.nan
         h = np.nan
         s = np.nan
+        x = np.nan
         
         p = np.nan
         
         # Read convert and set kwargs, ignore onces not defined
         # Inputs converted to SI for use by fluid-class
         for key, arg in kwargs.items():
-            if key == 'h':
+            if key == 'T':
+                T = arg
+            elif key == 'h':
                 h = self.unit_converter.convert(arg, prop = 'h', to_from = 'to_SI')
             elif key == 's':
                 s = self.unit_converter.convert(arg, prop = 's', to_from = 'to_SI')
-            elif key == 'T':
-                T = arg
+            elif key == 'x':
+                x = arg
             else:
-                raise Exception(f'{key} is not a valid keyword, Valid keywords: T, h, s')
+                raise Exception(f'{key} is not a valid keyword, Valid keywords: T, h, s, x')
                 
         # Identify valid combination of kwargs and call corresponding fluid-class function
-        if 'T' in kwargs.keys():
-            # T
-            p = self.fluid_class.psat_t(T)
+        if 'x' in kwargs.keys():
+            if 'T' in kwargs.keys():
+                # T
+                p = self.fluid_class.psat_t(T)
+            elif 'h' in kwargs.keys():
+                if 's' in kwargs.keys():
+                    # h-s-sat
+                    p = self.fluid_class.psat_hs(h, s)
+                else:
+                    raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: T-x, s-x, h-s, h-s-x')
+            elif 's' in kwargs.keys():
+                # s
+                p = self.fluid_class.psat_s(s)
+            else:
+                raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: T-x, s-x, h-s, h-s-x')
         elif 'h' in kwargs.keys():
             if 's' in kwargs.keys():
                 # h-s
-                p = self.fluid_class.psat_hs(h, s)
+                p = self.fluid_class.p_hs(h, s)
             else:
-                raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: T, s, h-s')
-        elif 's' in kwargs.keys():
-            # s
-            p = self.fluid_class.psat_s(s)
+                raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: h-s')
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: T, s, h-s')
+            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: h-s')
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(p,prop = 'p', to_from = 'from_SI')
