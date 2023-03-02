@@ -57,7 +57,7 @@ class unit_conv():
         unit_systems_list : list of strings    list of unit systems
 
         """
-        unit_system_list = ['SI', 'US', 'SI_bar_kj']
+        unit_system_list = ['SI', 'US', 'SI_bar_kJ', 'SI_MPa_kJ']
         return unit_system_list
         
     def get_units(self):
@@ -164,10 +164,27 @@ class unit_conv():
                           'my': 'lb*s/ft^2',
                           'tc': 'Btu/h/ft/F',
                           'st': 'lb/inch'}, 
-               'SI_bar_kj': {'l': 'm',
+               'SI_bar_kJ': {'l': 'm',
                           'm': 'kg',
                           'E': 'kJ',
                           'p': 'bar(a)',
+                          'T': 'degC',
+                          'v': 'm^3/kg',
+                          'h': 'kJ/kg',
+                          'u': 'kJ/kg',
+                          's': 'kJ/kg/C',
+                          'cp': 'kJ/kg/C',
+                          'cv': 'kJ/kg/C',
+                          'w': 'm/s',
+                          'rho': 'kg/m^3',
+                          'x': '-',
+                          'my': 'Pa*s',
+                          'tc': 'W/m/K',
+                          'st': 'N/m'}, 
+               'SI_MPa_kJ': {'l': 'm',
+                          'm': 'kg',
+                          'E': 'kJ',
+                          'p': 'MPa',
                           'T': 'degC',
                           'v': 'm^3/kg',
                           'h': 'kJ/kg',
@@ -225,10 +242,26 @@ class unit_conv():
                                      'my':      1/0.0208854342,               # lb s / ft^2
                                      'tc':      1/0.5777893165,               # Btu/h/ft/F
                                      'st':      1/0.0057101471},              # lb/inch
-                              'SI_bar_kj': {'l': 1,                         # m
+                              'SI_bar_kJ': {'l': 1,                         # m
                                      'm':       1,                          # kg
                                      'E':       1e3,                        # kJ 
                                      'p':       1e5,                        # bar
+                                     'v':       1,                          # m^3/kg
+                                     'h':       1e3,                        # kJ/kg
+                                     'u':       1e3,                        # kJ/kg
+                                     's':       1e3,                        # kJ/kg/C
+                                     'cp':      1e3,                        # kJ/kg/C
+                                     'cv':      1e3,                        # kJ/kg/C
+                                     'w':       1,                          # m/s
+                                     'rho':     1,                          # kg/m^3
+                                     'x':       1,                          # -
+                                     'my':      1,                          # Pa s
+                                     'tc':      1,                          # W/m/K
+                                     'st':      1},                          # N/m
+                                'SI_MPa_kJ': {'l': 1,                         # m
+                                     'm':       1,                          # kg
+                                     'E':       1e3,                        # kJ 
+                                     'p':       1e6,                        # bar
                                      'v':       1,                          # m^3/kg
                                      'h':       1e3,                        # kJ/kg
                                      'u':       1e3,                        # kJ/kg
@@ -259,11 +292,13 @@ class unit_conv():
 
         """
         variable_conversion_factors = {'T_to': {'SI':           x,                  # K
-                                                'US':           (x-32)*5/9+273.15,         # F
-                                                'SI_bar_kj':    x+273.15},          # C
+                                                'US':           (x-32)*5/9+273.15,  # F
+                                                'SI_bar_kJ':    x+273.15,           # C
+                                                'SI_MPa_kJ':    x+273.15},          # C
                                        'T_from': {'SI':         x,                  # K
-                                                  'US':         ((x-273.15)*9/5)+32,         # F
-                                                  'SI_bar_kj':  x-273.15},          # C
+                                                  'US':         ((x-273.15)*9/5)+32,# F
+                                                  'SI_bar_kJ':  x-273.15,           # C
+                                                  'SI_MPa_kJ':  x-273.15},          # C
                                                }
         return variable_conversion_factors[prop][self.unit_system]
         
