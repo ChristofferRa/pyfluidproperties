@@ -38,8 +38,8 @@ List of functions and code structure for pyfluidproperties class:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 
-from iapwsif97_class import iapwsif97
-from unit_system_converter import unit_conv
+from .iapwsif97_class import iapwsif97
+from .unit_system_converter import unit_conv
 import numpy as np
 
 class properties:

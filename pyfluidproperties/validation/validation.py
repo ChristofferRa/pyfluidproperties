@@ -10,8 +10,8 @@ ones used by the class.
 @author: Christoffer Rappmann, christoffer.rappman@gmail.com
 """
 
-from iapwsif97_class import iapwsif97 as w_prop
-from iapwsif97_class import if97, if97_tvphps, if97_phs, f08 
+from pyfluidproperties.iapwsif97_class import iapwsif97 as w_prop
+from pyfluidproperties.iapwsif97_class import if97, if97_tvphps, if97_phs, f08 
 
 import numpy as np
 from tabulate import tabulate

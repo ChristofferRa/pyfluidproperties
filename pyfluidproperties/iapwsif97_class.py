@@ -174,27 +174,27 @@ Bugs:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 # Parent class
-from fluid_prop import fluid_prop
+from pyfluidproperties.fluid_prop import fluid_prop
 
 # sub functions
 # Global Constants
-import iapwsif97_globals as global_property
+from pyfluidproperties import iapwsif97_globals as global_property
 # Main iapwsif97-implementation
-import iapwsif97_main as if97
+from . import iapwsif97_main as if97
 # Iapwsif97 suplementary release 5, IAPWS SR5-05(2016)
-import iapwsif97_vpt3 as if97_vpt3
+from . import iapwsif97_vpt3 as if97_vpt3
 # Iapwsif97 suplementary release 3, IAPWS SR3-03(2014)
-import iapwsif97_tps3_tph3_vph3_vps3 as if97_tvphps
-# Iapwsif97 suplementary release 2 and 4, IAPWS SR2-01(2014) and SR4-04(2014)
-import iapwsif97_phs as if97_phs
+from . import iapwsif97_tps3_tph3_vph3_vps3 as if97_tvphps
+# Iapws.if97 suplementary release 2 and 4, IAPWS SR2-01(2014) and SR4-04(2014)
+from . import iapwsif97_phs as if97_phs
 # iapwsf08, viscosity of ordinary water, R12-08
-import iapwsf08_my as f08
+from . import iapwsf08_my as f08
 # iapwsf11, thermal conductivity of ordinary water, R15-11
-import iapwsf11_tc as f11
+from . import iapwsf11_tc as f11
 # iapwsR1-76, surface tension
-import iapwsR176_st as r176
+from . import iapwsR176_st as r176
 # Helper functions
-import iapwsif97_helper_functions as aux
+from . import iapwsif97_helper_functions as aux
 
 # Dependencies
 import numpy as np
@@ -492,12 +492,25 @@ class iapwsif97(fluid_prop):
             self.s = np.nan
             self.st = np.nan
                        
-        # N/A for 2-phase
-        self.cp = np.nan
-        self.cv = np.nan
-        self.w  = np.nan # Not implemented, not part of iapwsif97
-        self.my = np.nan # Not defined for two-phase
-        self.tc = np.nan # Not defined for two-phase
+        # N/A for 2-phase, only defined for sat Vapor or sat Liquid
+        if x == 0.0:
+            self.cp = iapwsif97.cpL_p(p)
+            self.cv = iapwsif97.cvL_p(p)
+            self.w  = iapwsif97.wL_p(p)
+            self.my = iapwsif97.myL_p(p)
+            self.tc = iapwsif97.tcL_p(p) 
+        elif x == 1.0:
+            self.cp = iapwsif97.cpV_p(p)
+            self.cv = iapwsif97.cvV_p(p)
+            self.w  = iapwsif97.wV_p(p)
+            self.my = iapwsif97.myV_p(p)
+            self.tc = iapwsif97.tcV_p(p)
+        else:
+            self.cp = np.nan
+            self.cv = np.nan
+            self.w  = np.nan
+            self.my = np.nan
+            self.tc = np.nan
         
         if self.v != 0.0 and self.v != np.nan:
             self.rho = x*(1/v_v) + (1-x)*(1/v_l)
@@ -605,12 +618,25 @@ class iapwsif97(fluid_prop):
             self.s = np.nan
             self.st = np.nan
                        
-        # N/A for 2-phase
-        self.cp = np.nan
-        self.cv = np.nan
-        self.w  = np.nan # Not implemented, not part of iapwsif97
-        self.my = np.nan # Not defined for two-phase
-        self.tc = np.nan # Not defined for two-phase
+        # N/A for 2-phase, only defined for sat Vapor or sat Liquid
+        if x == 0.0:
+            self.cp = iapwsif97.cpL_T(T)
+            self.cv = iapwsif97.cvL_T(T)
+            self.w  = iapwsif97.wL_T(T)
+            self.my = iapwsif97.myL_T(T)
+            self.tc = iapwsif97.tcL_T(T) 
+        elif x == 1.0:
+            self.cp = iapwsif97.cpV_T(T)
+            self.cv = iapwsif97.cvV_T(T)
+            self.w  = iapwsif97.wV_T(T)
+            self.my = iapwsif97.myV_T(T)
+            self.tc = iapwsif97.tcV_T(T)
+        else:
+            self.cp = np.nan
+            self.cv = np.nan
+            self.w  = np.nan
+            self.my = np.nan
+            self.tc = np.nan
         
         if self.v != 0.0 and self.v != np.nan:
             self.rho = x*(1/v_v) + (1-x)*(1/v_l)

@@ -13,12 +13,13 @@ All functions except: vx_ph(p, h), vx_ps(p, s), vx_hs(h, s) since these are not 
 @author: Christoffer Rappmann, christoffer.rappman@gmail.com
 """
 
-from iapwsif97_class import iapwsif97 as w_prop
+from pyfluidproperties.iapwsif97_class import iapwsif97 as w_prop
 import numpy as np
 import time
 
 def main():
-
+    print('Validation of IAPWSIF97-class, comparing results to NIST(IAPWSIF95)\n\n')
+    
     # Initiate object
     w = w_prop(10*10**6, 100+273.15)
     
@@ -42,6 +43,7 @@ def main():
     # T, p, rho, v, u, h, s, Cv, Cp, w, JT, my, tc, phase
     iapwsif_results_sat_vap_p = np.zeros((0,14))
     iapwsif_results_sat_vap_p_static = np.zeros((0,14))
+    iapwsif_results_sat_vap_T = np.zeros((0,14))
     iapwsif_results_sat_vap_T_static = np.zeros((0,14))
     
     iapwsif_results_sat_vap_px = np.zeros((0,14))
@@ -50,6 +52,7 @@ def main():
     # T, p, rho, v, u, h, s, Cv, Cp, w, JT, my, tc, st, phase
     iapwsif_results_sat_liq_p = np.zeros((0,15))
     iapwsif_results_sat_liq_p_static = np.zeros((0,15))
+    iapwsif_results_sat_liq_T = np.zeros((0,15))
     iapwsif_results_sat_liq_T_static = np.zeros((0,15))
 
     iapwsif_results_sat_liq_px = np.zeros((0,15))
@@ -75,16 +78,23 @@ def main():
     Temperature (K),Pressure (MPa),Density (kg/m3),Volume (m3/kg),Internal Energy (kJ/kg),Enthalpy (kJ/kg),Entropy (J/g*K),Cv (J/g*K),Cp (J/g*K),Sound Spd. (m/s),Joule-Thomson (K/MPa),Viscosity (Pa*s),Therm. Cond. (W/m*K),Phase
     """
     
+    print('Fluid states from NIST,\nhttps://webbook.nist.gov/cgi/fluid.cgi?ID=C7732185&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=Pa*s&STUnit=N%2Fm&Type=IsoTherm&RefState=DEF&Action=Page\nRange is specified on nist website and the corresponding table is copied to a csv-file with the following columns\nTemperature (K),Pressure (MPa),Density (kg/m3),Volume (m3/kg),Internal Energy (kJ/kg),Enthalpy (kJ/kg),Entropy (J/g*K),Cv (J/g*K),Cp (J/g*K),Sound Spd. (m/s),Joule-Thomson (K/MPa),Viscosity (Pa*s),Therm. Cond. (W/m*K),Phase')
     nist_header = np.array(['Temperature (K)','Pressure (MPa)','Density (kg/m3)','Volume (m3/kg)','Internal Energy (kJ/kg)','Enthalpy (kJ/kg)','Entropy (kJ/g*K)','Cv (kJ/g*K)','Cp (kJ/g*K)','Sound Spd. (m/s)','Joule-Thomson (K/MPa)','Viscosity (Pa*s)','Therm. Cond. (W/m*K)','Phase'])
     # Ordinary data points
-    nist_data = np.genfromtxt('fluid_states_IAPWSIF95_nist_0to2000K_01to100MPa.csv', delimiter=',',skip_header=True)
+    data_file = 'fluid_states_IAPWSIF95_nist_0to2000K_01to100MPa.csv'
+    nist_data = np.genfromtxt(data_file, delimiter=',',skip_header=True)
     # Saturation data pressure
-    nist_data_sat_liq = np.genfromtxt('fluid_states_IAPWSIF95_nist_saturation_liquid_p.csv', delimiter=',',skip_header=True)
-    nist_data_sat_vap = np.genfromtxt('fluid_states_IAPWSIF95_nist_saturation_vapor_p.csv', delimiter=',',skip_header=True)
+    data_file_sat_liq = 'fluid_states_IAPWSIF95_nist_saturation_liquid_p.csv'
+    data_file_sat_vap = 'fluid_states_IAPWSIF95_nist_saturation_vapor_p.csv'
+    nist_data_sat_liq = np.genfromtxt(data_file_sat_liq, delimiter=',',skip_header=True)
+    nist_data_sat_vap = np.genfromtxt(data_file_sat_vap, delimiter=',',skip_header=True)
+    
+    print(f'\nCalculating fluid properties for all fluid states provided in:\n - {data_file}\n - {data_file_sat_liq}\n - {data_file_sat_vap}\n ')
     
     ##################################
     #### Verification calculations ###
     ##################################
+    print('\nCalculating properties using _pt, _ph, _ps, _hs and _prho functions....')
     tic = time.perf_counter()
     for i in range(0, len(nist_data)):
         
@@ -119,7 +129,8 @@ def main():
         rho = nist_data[i,2]
         iapwsif_results_h_prho = np.append(iapwsif_results_h_prho, [[np.nan, p*10**-6, rho, np.nan, np.nan, w_prop.h_prho(p, rho)*10**-3, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]], axis = 0)
         
-    # Saturation properties, , , , , 
+    # Saturation properties
+    print('Calculating saturation properties using _px, _Tx, L_p, V_p, L_T, V_T and sat_s functions....')
     for j in range(0, len(nist_data_sat_liq)):
         # update_px & *L_p
         p = nist_data_sat_liq[j,1]*10**6
@@ -130,6 +141,9 @@ def main():
         
         #*L_T
         T = nist_data_sat_liq[j,0]
+                
+        w.update_tx(T, 0.0)
+        iapwsif_results_sat_liq_T = np.append(iapwsif_results_sat_liq_T, [[w.T, w.p*10**-6, 1/w.v, w.v, w.u*10**-3, w.h*10**-3, w.s*10**-3, w.cv*10**-3, w.cp*10**-3, w.w, np.nan, w.my, w.tc, w.st, np.nan]], axis = 0)
         iapwsif_results_sat_liq_T_static = np.append(iapwsif_results_sat_liq_T_static, [[T, w_prop.psat_t(T)*10**-6, w_prop.rhoL_T(T), w_prop.vL_T(T), w_prop.uL_T(T)*10**-3, w_prop.hL_T(T)*10**-3, w_prop.sL_T(T)*10**-3, w_prop.cvL_T(T)*10**-3, w_prop.cpL_T(T)*10**-3, w_prop.wL_T(T), np.nan, w_prop.myL_T(T), w_prop.tcL_T(T), w_prop.st_t(T), np.nan]], axis = 0)
         
         #h_tx(t, x), h_px(p, x), s_tx(t, x), s_px(p, x)      
@@ -148,8 +162,10 @@ def main():
         iapwsif_results_sat_vap_p = np.append(iapwsif_results_sat_vap_p, [[w.T, w.p*10**-6, 1/w.v, w.v, w.u*10**-3, w.h*10**-3, w.s*10**-3, w.cv*10**-3, w.cp*10**-3, w.w, np.nan, w.my, w.tc, np.nan]], axis = 0)
         iapwsif_results_sat_vap_p_static = np.append(iapwsif_results_sat_vap_p_static, [[w_prop.Tsat_p(p), p*10**-6, w_prop.rhoV_p(p), w_prop.vV_p(p), w_prop.uV_p(p)*10**-3, w_prop.hV_p(p)*10**-3, w_prop.sV_p(p)*10**-3, w_prop.cvV_p(p)*10**-3, w_prop.cpV_p(p)*10**-3, w_prop.wV_p(p), np.nan, w_prop.myV_p(p), w_prop.tcV_p(p), np.nan]], axis = 0)
         
-        # *V_T
+        # update_Tx & *V_T
         T = nist_data_sat_vap[j,0]
+        w.update_tx(T, 1.0)
+        iapwsif_results_sat_vap_T = np.append(iapwsif_results_sat_vap_T, [[w.T, w.p*10**-6, 1/w.v, w.v, w.u*10**-3, w.h*10**-3, w.s*10**-3, w.cv*10**-3, w.cp*10**-3, w.w, np.nan, w.my, w.tc, np.nan]], axis = 0)
         iapwsif_results_sat_vap_T_static = np.append(iapwsif_results_sat_vap_T_static, [[T, w_prop.psat_t(T)*10**-6, w_prop.rhoV_T(T), w_prop.vV_T(T), w_prop.uV_T(T)*10**-3, w_prop.hV_T(T)*10**-3, w_prop.sV_T(T)*10**-3, w_prop.cvV_T(T)*10**-3, w_prop.cpV_T(T)*10**-3, w_prop.wV_T(T), np.nan, w_prop.myV_T(T), w_prop.tcV_T(T), np.nan]], axis = 0)
       
         #h_tx(t, x), h_px(p, x), s_tx(t, x), s_px(p, x)      
@@ -158,6 +174,7 @@ def main():
         
     # Two-phase properties
     
+    print('Calculating two-phase properties using _px and _Tx functions....')
     x = .5 # massfraction to validate
     
     # Check that liq and sat data contains equal amount of data-points
@@ -247,9 +264,18 @@ def main():
     results_diff_sat_vap_p_stat = diff(nist_data_sat_vap,iapwsif_results_sat_vap_p_static)
     print_max_diff('Saturated Vapor, *V_p - functions', results_diff_sat_vap_p_stat, nist_data_sat_vap, nist_header)
     
+    # update_Tx(x=0)
+    results_diff_sat_liq_T = diff(nist_data_sat_liq, iapwsif_results_sat_liq_T)
+    print_max_diff('Saturated Liquid, update_Tx(x=0.0)', results_diff_sat_liq_T, nist_data_sat_liq, nist_header)
+    
     # *L_T
     results_diff_sat_liq_T = diff(nist_data_sat_liq,iapwsif_results_sat_liq_T_static)
     print_max_diff('Saturated Liquid, *L_T - functions', results_diff_sat_liq_T, nist_data_sat_liq, nist_header)
+    
+    # update_Tx(x=1.0)
+    results_diff_sat_vap_T = diff(nist_data_sat_vap,iapwsif_results_sat_vap_T)
+    print_max_diff('Saturated Vapor, update_Tx(x=1.0)', results_diff_sat_vap_T, nist_data_sat_vap, nist_header)
+    
     # *V_T
     results_diff_sat_vap_T = diff(nist_data_sat_vap,iapwsif_results_sat_vap_T_static)
     print_max_diff('Saturated Vapor, *V_T - functions', results_diff_sat_vap_T, nist_data_sat_vap, nist_header)

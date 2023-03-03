@@ -26,7 +26,7 @@ List of functions and code structure:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 import numpy as np
-from iapwsif97_main import t_sat_p_r4 as t_97sat
+from .iapwsif97_main import t_sat_p_r4 as t_97sat
 
 def t_3ab(p):
     """

@@ -141,12 +141,12 @@ List of functions and code structure:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 import numpy as np
-from iapwsif97_tps3_tph3_vph3_vps3 import p_3sat_h, p_3sat_s
+from .iapwsif97_tps3_tph3_vph3_vps3 import p_3sat_h, p_3sat_s
 
 # Helper functions
-import iapwsif97_helper_functions as aux
+from . import iapwsif97_helper_functions as aux
 # Global Constants
-import iapwsif97_globals as global_property
+from . import iapwsif97_globals as global_property
 
 # Specific gas constant
 R = global_property.R #J/kg/K      Eq. 1

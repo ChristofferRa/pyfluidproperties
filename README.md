@@ -42,18 +42,18 @@ from pyfluidproperties import properties
 ##### Initializing:
 ```
 # Initialize object by choosing fluid and unit-system
-fluid = properties(fluid = "H2O", unit_system = 'SI_bar_kj')
+my_fluid = properties(fluid = "H2O", unit_system = 'SI_bar_kJ')
 ```
 ##### Update fluid state:
 ```
 # p = 10 bar(a), T = 200 degC
-fluid.update(p = 10, T = 200)
-print(fluid)
+my_fluid.update(p = 10, T = 200)
+print(my_fluid)
 ```
 ##### Output:
 ```
 Fluid:			Water (H2O)
-Unit system:	SI_bar_kj
+Unit system:	SI_bar_kJ
 
 Pressure,		p = 10.000000	bar(a)
 Temperature,	T = 200.000000	degC
@@ -77,13 +77,13 @@ Accessing property value with: fluid_object.*, replace * with one of the basic p
 ```
 # Calculating dynamic pressure
 v = 10 # m/s
-p_dyn = 0.5*fluid.rho*v**2
+p_dyn = 0.5*my_fluid.rho*v**2
 ```
 ##### Calculating a single property
 Calculate and use single properties with "get_*"-functions, just change * to one of the basic properties letters:
 ```
 # Enthalpy for saturated steam at p = 5 bar(a)
-h = fluid.get_h(p = 5, x = 1.0)
+h = my_fluid.get_h(p = 5, x = 1.0)
 ```
 
 ### Available functions
@@ -109,7 +109,7 @@ Update intialized object with all fluid properties for a new fluid state
 
 ###### Ex:
 ```
-fluid.update_pt(p = 5, h = 500)
+my_fluid.update_pt(p = 5, h = 500)
 ```
 
 ##### .get_* functions, Calculate Individual properties
@@ -135,28 +135,39 @@ For saturation properties use x = 0.0 for liquid and x = 1.0 for vapor.
 
 ###### Ex: Viscosity at 5 bar(a) and 500 kJ/kg
 ```
-my = fluid.my(p = 5, h = 500)
+my = my_fluid.my(p = 5, h = 500)
+```
+##### Misc
+There are functions that return available fluids and unit-systems. These are static functions and can be used without an instance of the fluid-object. 
+###### Ex:
+```
+from pyfluidproperties import properties as pyprop
+print(pyprop.get_fluids)
+print(pyprop.get_unit_systems)
+```
+###### Output:
+```
 ```
 ### Unit systems
 Several different unit systems are supported. Unit-system is choosen when object is initialized with "unit_system"-keyword. 
 
 ##### Available unit systems
-| Description                       | Unit      |  Unit   | Unit |
-| ------                            | ------    | ------    | ------    |
-| Unit-system                       | SI      |  SI_bar_kj   | US |
-| Pressure                           | Pa        | bar(a)    | psia
-| Temperature                        | K         | C         | F
-| Specific Volume                    | m^3/kg    | m^3/kg    | ft^3/lbs
-| Specific Enthalpy                  | J/kg      | kJ/kg     | Btu/lbm
-| Specific Internal Energy           | J/kg      | kJ/kg     | Btu/lbm
-| Specific Entropy                   | J/kg/K    | kJ/kg/C   | Btu/lbm/R
-| Specific Isobaric heat capacity    | J/kg/K    | kJ/kg/C   | Btu/lbm/R
-| Specific Isochoric heat capacity   | J/kg/K    | kJ/kg/C   | Btu/lbm/R
-| Speed of sound                     | m/s       | m/s       | ft/s
-| Vapor mass fraction                | -         | -         | -
-| Dynamic Viscosity                  | Pa*s      | Pa*s      | lb*s/ft^2
-| Thermal Conductivity               | W/m/K     | W/m/K     | Btu/h/ft/F
-| Surface Tension                    | N/m       | N/m       | lb/inch
+| Description                       | Unit      |  Unit         |  Unit     | Unit |
+| ------                            | ------    | ------        | ------    | ------    |
+| Unit-system                       | SI        |  SI_bar_kJ    |SI_MPa_kJ  | US        |
+| Pressure                          | Pa        | bar(a)        | MPa       | psia
+| Temperature                       | K         | C         | C         | F
+| Specific Volume                   | m^3/kg    | m^3/kg    | m^3/kg    | ft^3/lbs
+| Specific Enthalpy                 | J/kg      | kJ/kg     | kJ/kg     | Btu/lbm
+| Specific Internal Energy          | J/kg      | kJ/kg     | kJ/kg     | Btu/lbm
+| Specific Entropy                  | J/kg/K    | kJ/kg/C   | kJ/kg/C   | Btu/lbm/R
+| Specific Isobaric heat capacity   | J/kg/K    | kJ/kg/C   | kJ/kg/C   | Btu/lbm/R
+| Specific Isochoric heat capacity  | J/kg/K    | kJ/kg/C   | kJ/kg/C   | Btu/lbm/R
+| Speed of sound                    | m/s       | m/s       | m/s       | ft/s
+| Vapor mass fraction               | -         | -         | -         | -
+| Dynamic Viscosity                 | Pa*s      | Pa*s      | Pa*s      | lb*s/ft^2
+| Thermal Conductivity              | W/m/K     | W/m/K     | W/m/K     | Btu/h/ft/F
+| Surface Tension                   | N/m       | N/m       | N/m       | lb/inch
 
 ###### Ex: Initializing Water with US-units:
 ```

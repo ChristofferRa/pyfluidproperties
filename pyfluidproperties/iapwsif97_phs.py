@@ -36,9 +36,9 @@ List of functions and code structure:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 
-import iapwsif97_globals as global_property
-from iapwsif97_main import p_t_b23
-import iapwsif97_helper_functions as aux
+from . import iapwsif97_globals as global_property
+from .iapwsif97_main import p_t_b23
+from . import iapwsif97_helper_functions as aux
 import numpy as np
 
 
