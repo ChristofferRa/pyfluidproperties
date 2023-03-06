@@ -38,7 +38,7 @@ List of functions and code structure:
 
 from . import iapwsif97_globals as global_property
 from .iapwsif97_main import p_t_b23
-from . import iapwsif97_helper_functions as aux
+from .... import utils as aux
 import numpy as np
 
 

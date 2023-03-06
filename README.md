@@ -31,8 +31,14 @@ Presented in SI-unit, other unit-systems are available, see "Unit-system" chapte
 ## Usage
 A short introduction to using pyfluidproperties.
 ### Installation
+Install using pip:
 ```
 $ pip install pyfluidproperties
+```
+or manually:
+```
+$ cd your_path\pyfluidproperties\
+$ python setup.py install
 ```
 ### Workflow
 ##### Importing:

@@ -13,7 +13,7 @@ All functions except: vx_ph(p, h), vx_ps(p, s), vx_hs(h, s) since these are not 
 @author: Christoffer Rappmann, christoffer.rappman@gmail.com
 """
 
-from pyfluidproperties.iapwsif97_class import iapwsif97 as w_prop
+from pyfluidproperties import iapwsif97 as w_prop
 import numpy as np
 import time
 

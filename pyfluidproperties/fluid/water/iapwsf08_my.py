@@ -20,7 +20,7 @@ List of functions and code structure:
 
 import numpy as np
 
-from . import iapwsif97_globals as global_property
+from .iapwsif97 import iapwsif97_globals as global_property
 
 # Reference constants
 t_star      = global_property.T_crit    # K         reference temperature

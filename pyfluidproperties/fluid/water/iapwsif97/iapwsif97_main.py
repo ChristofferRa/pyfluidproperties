@@ -144,7 +144,7 @@ import numpy as np
 from .iapwsif97_tps3_tph3_vph3_vps3 import p_3sat_h, p_3sat_s
 
 # Helper functions
-from . import iapwsif97_helper_functions as aux
+from .... import utils as aux
 # Global Constants
 from . import iapwsif97_globals as global_property
 

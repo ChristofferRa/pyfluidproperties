@@ -174,19 +174,19 @@ Bugs:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 # Parent class
-from pyfluidproperties.fluid_prop import fluid_prop
+from pyfluidproperties.fluid.fluid_prop import fluid_prop
 
 # sub functions
 # Global Constants
-from pyfluidproperties import iapwsif97_globals as global_property
+from .iapwsif97 import iapwsif97_globals as global_property
 # Main iapwsif97-implementation
-from . import iapwsif97_main as if97
+from .iapwsif97 import iapwsif97_main as if97
 # Iapwsif97 suplementary release 5, IAPWS SR5-05(2016)
-from . import iapwsif97_vpt3 as if97_vpt3
+from .iapwsif97 import iapwsif97_vpt3 as if97_vpt3
 # Iapwsif97 suplementary release 3, IAPWS SR3-03(2014)
-from . import iapwsif97_tps3_tph3_vph3_vps3 as if97_tvphps
+from .iapwsif97 import iapwsif97_tps3_tph3_vph3_vps3 as if97_tvphps
 # Iapws.if97 suplementary release 2 and 4, IAPWS SR2-01(2014) and SR4-04(2014)
-from . import iapwsif97_phs as if97_phs
+from .iapwsif97 import iapwsif97_phs as if97_phs
 # iapwsf08, viscosity of ordinary water, R12-08
 from . import iapwsf08_my as f08
 # iapwsf11, thermal conductivity of ordinary water, R15-11
@@ -194,7 +194,7 @@ from . import iapwsf11_tc as f11
 # iapwsR1-76, surface tension
 from . import iapwsR176_st as r176
 # Helper functions
-from . import iapwsif97_helper_functions as aux
+from ... import utils as aux
 
 # Dependencies
 import numpy as np

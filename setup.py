@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from distutils.core import setup
+#from setuptools import find_packages
 setup(
   name = 'pyfluidproperties',
-  packages = ['pyfluidproperties'],
+  packages = ['pyfluidproperties', 'pyfluidproperties.utils', 'pyfluidproperties.fluid'],
   version = '0.5',      
   license='agpl-3.0',
   description = 'Fluid properties for common fluids',
@@ -11,7 +12,7 @@ setup(
   url = 'https://github.com/ChristofferRa/pyfluidfroperties', 
   download_url = 'https://github.com/ChristofferRa/pyfluidfroperties/archive/v_01.tar.gz',
   keywords = ['Fluid', 'Properties', 'IAPWSIF97', 'Water', 'H2O', 'Water properties', 'Steam tables', 'Engineering thermodynamics'],
-  install_requires=['numpy',
+  install_requires=['numpy'
       ],
   classifiers=[
     'Development Status :: 4 - Beta',      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
