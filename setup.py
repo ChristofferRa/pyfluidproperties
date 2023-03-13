@@ -3,7 +3,7 @@ from distutils.core import setup
 #from setuptools import find_packages
 setup(
   name = 'pyfluidproperties',
-  packages = ['pyfluidproperties', 'pyfluidproperties.utils', 'pyfluidproperties.fluid'],
+  packages = ['pyfluidproperties', 'pyfluidproperties.utils', 'pyfluidproperties.fluid', 'pyfluidproperties.fluid.water', 'pyfluidproperties.fluid.water.iapwsif97'],
   version = '0.5',      
   license='agpl-3.0',
   description = 'Fluid properties for common fluids',

@@ -34,12 +34,13 @@ List of functions and code structure for pyfluidproperties class:
         set_properties(self,properties_dict)
         get_fluids()
         get_unit_systems()
+        __str__
 
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 
 from .fluid.water import iapwsif97
-from .unit_system_converter import unit_conv
+from .utils import unit_conv
 import numpy as np
 
 class properties:
@@ -78,7 +79,7 @@ class properties:
                 unit_system = arg
         
         # Check for enough and valid inputs, otherwhise abort...
-        if fluid not in properties.get_fluids():
+        if fluid not in properties.get_fluids().keys():
             raise Exception(f'"{fluid}" is not a valid input for "fluid = "')
             
         if unit_system not in properties.get_unit_systems():
@@ -109,13 +110,12 @@ class properties:
 
         """
         
+        self.region = ''
+        
         if self.fluid == 'H2O':
             self.fluid_class = iapwsif97(p, t)
-        elif self.fluid == 'N2':
-            self.fluid_class = None
         else:
-            print('No valid fluid specified')
-            self.fluid_class = None
+            raise Exception('Specified fluid not available')
         
         # Set default properties
         properties.set_properties(self, {'p': self.fluid_class.p,
@@ -1296,8 +1296,8 @@ class properties:
         fluid_list : list of strings    list of fluids
 
         """
-        fluid_list = ['H2O', 'N2']
-        return fluid_list
+        fluids = {'H2O': 'Water','N2': 'Nitrogen'}
+        return fluids
     
     @staticmethod
     def get_unit_systems():
@@ -1320,21 +1320,22 @@ class properties:
         # Units used:
         units = self.unit_converter.get_units()
         
-        return(f'\n\nFluid:\t\t\tWater (H2O)\nUnit system:\t{self.unit_converter.unit_system}\n\n' +
-               f'Pressure,\t\tp = {self.p:.6f}\t{units["p"]}\n' +
-               f'Temperature,\tT = {self.T:.6f}\t{units["T"]}\n\n' +
-               f'region =\t{self.fluid_class.region}\n\n'
-               f'Specific Volume,\t\t\t\t\t\tv  =\t\t{self.v:.11f}\t\t{units["v"]}\n' +
-               f'Specific Enthalpy,\t\t\t\t\t\th  =\t\t{self.h:.11f}\t{units["h"]}\n' +
-               f'Specific Internal Energy,\t\t\t\tu  =\t\t{self.u:.11f}\t{units["u"]}\n' +
-               f'Specific Entropy,\t\t\t\t\t\ts  =\t\t{self.s:.11f}\t\t{units["s"]}\n' +
-               f'Specific Isobaric heat capacity,\t\tcp =\t\t{self.cp:.11f}\t{units["cp"]}\n' +
-               f'Specific Isochoric heat capacity,\t\tcv =\t\t{self.cv:.11f}\t\t{units["cv"]}\n' +
-               f'Speed of sound,\t\t\t\t\t\t\tw  =\t\t{self.w:.11f}\t\t{units["w"]}\n' + 
-               f'Vapor mass fraction,\t\t\t\t\tx  =\t\t{self.x:.11f}\t\t(-)\n' +
-               f'Dynamic Viscosity,\t\t\t\t\t\tmy =\t\t{self.my:.11f}\t\t{units["my"]}\n' +
-               f'Thermal Conductivity,\t\t\t\t\ttc =\t\t{self.tc:.11f}\t\t{units["tc"]}\n' +
-               f'Surface Tension,\t\t\t\t\t\tst =\t\t{self.st:.11f}\t\t{units["st"]}\n')
+        return(f'\n\n{"Fluid:": <20}{properties.get_fluids()[self.fluid]} ({self.fluid})\n' + 
+               f'{"Unit system:": <20}{self.unit_converter.unit_system}\n\n' +
+               f'{"Pressure": <20}p = {self.p:>11.6f}  {units["p"]}\n' +
+               f'{"Temperature": <20}T = {self.T:>11.6f}  {units["T"]}\n\n' +
+               f'{"region =": <10}{self.fluid_class.region}\n\n'
+               f'{"Specific Volume": <35}{"v =": >4} {self.v:>13.6f}  {units["v"]}\n' +
+               f'{"Specific Enthalpy": <35}{"h =": >4} {self.h:>13.6f}  {units["h"]}\n' +
+               f'{"Specific Internal Energy": <35}{"u =": >4} {self.u:>13.6f}  {units["u"]}\n' +
+               f'{"Specific Entropy": <35}{"s =": >4} {self.s:>13.6f}  {units["s"]}\n' +
+               f'{"Specific Isobaric heat capacity": <35}{"cp =": >4} {self.cp:>13.6f}  {units["cp"]}\n' +
+               f'{"Specific Isochoric heat capacity": <35}{"cv =": >4} {self.cv:>13.6f}  {units["cv"]}\n' +
+               f'{"Speed of sound": <35}{"w =": >4} {self.w:>13.6f}  {units["w"]}\n' + 
+               f'{"Vapor mass fraction": <35}{"x =": >4} {self.x:>13.6f}  (-)\n' +
+               f'{"Dynamic Viscosity": <35}{"my =": >4} {self.my:>13.6f}  {units["my"]}\n' +
+               f'{"Thermal Conductivity": <35}{"tc =": >4} {self.tc:>13.6f}  {units["tc"]}\n' +
+               f'{"Surface Tension": <35}{"st =": >4} {self.st:>13.6f}  {units["st"]}\n')
     
     
 if __name__ == "__main__":
