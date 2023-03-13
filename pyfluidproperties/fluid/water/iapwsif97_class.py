@@ -213,44 +213,6 @@ class iapwsif97(fluid_prop):
     @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
     """
     
-    def __init__(self, p = 1*1e5, T = 20+273.15):
-        """
-        Initialize fluid properties
-        
-        Parameters
-        ----------
-        p:      double  pressure (Pa).
-        T:      double  temperature (K).
-
-        Returns
-        -------
-        None.
-
-        """
-        super().__init__(p,T)
-                
-        iapwsif97.update_pt(self,p, T)    
-      
-    def __str__(self):
-        """
-        Lists basic properties of object as a string
-        """
-        return(f'\n\nFluid: Water (H2O)\n\nPressure,\t\tp = {self.p*10**-6:.6f}\tMPa\n' +
-               f'Temperature,\tT = {self.T:.6f}\tK\n\n' +
-               f'region =\t{self.region}\n\n'
-               f'Specific Volume,\t\t\t\t\t\tv  =\t\t{self.v:.11f}\t\t(m^3/kg)\n' +
-               f'Specific Enthalpy,\t\t\t\t\t\th  =\t\t{self.h*10**-3:.11f}\t(kJ/kg)\n' +
-               f'Specific Internal Energy,\t\t\t\tu  =\t\t{self.u*10**-3:.11f}\t(kJ/kg)\n' +
-               f'Specific Entropy,\t\t\t\t\t\ts  =\t\t{self.s*10**-3:.11f}\t\t(kJ/kg/K)\n' +
-               f'Specific Isobaric heat capacity,\t\tcp =\t\t{self.cp*10**-3:.11f}\t(kJ/kg/K)\n' +
-               f'Specific Isochoric heat capacity,\t\tcv =\t\t{self.cv*10**-3:.11f}\t\t(kJ/kg/K)\n' +
-               f'Speed of sound,\t\t\t\t\t\t\tw  =\t\t{self.w:.11f}\t\t(m/s)\n' + 
-               f'Vapor mass fraction,\t\t\t\t\tx  =\t\t{self.x:.11f}\t\t(-)\n' +
-               f'Dynamic Viscosity,\t\t\t\t\t\tmy =\t\t{self.my:.11f}\t\t(Pa*s)\n' +
-               f'Thermal Conductivity,\t\t\t\t\ttc =\t\t{self.tc:.11f}\t\t(W/m/K)\n' +
-               f'Surface Tension,\t\t\t\t\t\tst =\t\t{self.st:.11f}\t\t(N/m)\n')
-    
-    
     def set_rho_r3_itt(itt):
         """
         Set method to calculate rho/v in region 3
@@ -278,6 +240,46 @@ class iapwsif97(fluid_prop):
         global rho_r3_itt
         
         rho_r3_itt = itt
+    
+    def __init__(self, p = 1*1e5, T = 20+273.15, high_accuracy = False):
+        """
+        Initialize fluid properties
+        
+        Parameters
+        ----------
+        p:      double  pressure (Pa).
+        T:      double  temperature (K).
+
+        Returns
+        -------
+        None.
+
+        """
+        super().__init__(p,T)
+        
+        self.high_accuracy_mode = high_accuracy
+        
+        iapwsif97.update_pt(self,p, T)   
+        
+      
+    def __str__(self):
+        """
+        Lists basic properties of object as a string
+        """
+        return(f'\n\nFluid: Water (H2O)\n\nPressure,\t\tp = {self.p*10**-6:.6f}\tMPa\n' +
+               f'Temperature,\tT = {self.T:.6f}\tK\n\n' +
+               f'region =\t{self.region}\n\n'
+               f'Specific Volume,\t\t\t\t\t\tv  =\t\t{self.v:.11f}\t\t(m^3/kg)\n' +
+               f'Specific Enthalpy,\t\t\t\t\t\th  =\t\t{self.h*10**-3:.11f}\t(kJ/kg)\n' +
+               f'Specific Internal Energy,\t\t\t\tu  =\t\t{self.u*10**-3:.11f}\t(kJ/kg)\n' +
+               f'Specific Entropy,\t\t\t\t\t\ts  =\t\t{self.s*10**-3:.11f}\t\t(kJ/kg/K)\n' +
+               f'Specific Isobaric heat capacity,\t\tcp =\t\t{self.cp*10**-3:.11f}\t(kJ/kg/K)\n' +
+               f'Specific Isochoric heat capacity,\t\tcv =\t\t{self.cv*10**-3:.11f}\t\t(kJ/kg/K)\n' +
+               f'Speed of sound,\t\t\t\t\t\t\tw  =\t\t{self.w:.11f}\t\t(m/s)\n' + 
+               f'Vapor mass fraction,\t\t\t\t\tx  =\t\t{self.x:.11f}\t\t(-)\n' +
+               f'Dynamic Viscosity,\t\t\t\t\t\tmy =\t\t{self.my:.11f}\t\t(Pa*s)\n' +
+               f'Thermal Conductivity,\t\t\t\t\ttc =\t\t{self.tc:.11f}\t\t(W/m/K)\n' +
+               f'Surface Tension,\t\t\t\t\t\tst =\t\t{self.st:.11f}\t\t(N/m)\n')
     
     ### Object updating functions ####
     
@@ -338,7 +340,7 @@ class iapwsif97(fluid_prop):
             
             rho = 1/if97_vpt3.v_pt(p, T)
 
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if self.high_accuracy_mode: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
                 
             self.v = 1/rho

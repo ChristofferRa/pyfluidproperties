@@ -60,7 +60,8 @@ class properties:
         Parameters
         ----------
         fluid :         string      fluid 
-        unit_system :   string      unit system si/us
+        unit_system :   string      unit system
+        high_accuracy : boolean     high accuracy mode on/of
 
         Returns
         -------
@@ -70,6 +71,7 @@ class properties:
         # Set defaults
         unit_system = 'SI' # Convert to SI-units as deafult
         fluid = None
+        high_accuracy = False
         
         # Read  and set kwargs, ignore onces not defined
         for key, arg in kwargs.items():
@@ -77,6 +79,8 @@ class properties:
                 fluid = arg
             elif key == 'unit_system':
                 unit_system = arg
+            elif key == 'high_accuracy':
+                high_accuracy = arg
         
         # Check for enough and valid inputs, otherwhise abort...
         if fluid not in properties.get_fluids().keys():
@@ -89,11 +93,13 @@ class properties:
         self.fluid = fluid
         self.unit_system = unit_system
         
+        self.high_accuracy_mode = high_accuracy
+        
         # Init converter class and fluid class
         self.unit_converter = unit_conv(unit_system)
         properties.init_fluid(self)
+        
             
-    
     def init_fluid(self, p = 1.013*1e5, t = 20+273.15):
         """
         Returning object for chosen fluid when initializing the object.
@@ -113,7 +119,7 @@ class properties:
         self.region = ''
         
         if self.fluid == 'H2O':
-            self.fluid_class = iapwsif97(p, t)
+            self.fluid_class = iapwsif97(p, t, high_accuracy = self.high_accuracy_mode)
         else:
             raise Exception('Specified fluid not available')
         
@@ -273,8 +279,9 @@ class properties:
             # T-x
             h = self.fluid_class.h_tx(T, x)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-s, p-rho, p-x, T-x')
-        
+            # Return saved state when no input
+            return self.h
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(h,prop = 'h', to_from = 'from_SI')
        
@@ -344,8 +351,9 @@ class properties:
             # T-x
             v = self.fluid_class.v_tx(T, x)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
-        
+            # Return saved state when no input
+            return self.v
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(v,prop = 'v', to_from = 'from_SI')
     
@@ -415,7 +423,8 @@ class properties:
             # T-x
             u = self.fluid_class.u_tx(T, x)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
+            # Return saved state when no input
+            return self.u
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(u,prop = 'u', to_from = 'from_SI')
@@ -475,7 +484,8 @@ class properties:
             # T-x
             s = self.fluid_class.s_tx(T, x)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, h-s, p-x, T-x')
+            # Return saved state when no input
+            return self.s
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(s,prop = 's', to_from = 'from_SI')
@@ -556,8 +566,9 @@ class properties:
             else:
                 cp = np.nan
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
-        
+            # Return saved state when no input
+            return self.cp
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(cp,prop = 'cp', to_from = 'from_SI')
     
@@ -637,7 +648,8 @@ class properties:
             else:
                 cv = np.nan
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
+            # Return saved state when no input
+            return self.cv
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(cv,prop = 'cv', to_from = 'from_SI')
@@ -718,7 +730,8 @@ class properties:
             else:
                 w = np.nan
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
+            # Return saved state when no input
+            return self.w
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(w,prop = 'w', to_from = 'from_SI')
@@ -789,7 +802,8 @@ class properties:
             # T-x
             rho = self.fluid_class.rho_tx(T, x)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
+            # Return saved state when no input
+            return self.rho
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(rho,prop = 'rho', to_from = 'from_SI')
@@ -871,8 +885,9 @@ class properties:
             else:
                 my = np.nan
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
-        
+            # Return saved state when no input
+            return self.my
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(my,prop = 'my', to_from = 'from_SI')
       
@@ -952,8 +967,9 @@ class properties:
             else:
                 tc = np.nan
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-T, p-h, p-s, h-s, p-x, T-x')
-        
+            # Return saved state when no input
+            return self.tc
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(tc,prop = 'tc', to_from = 'from_SI')
        
@@ -996,7 +1012,8 @@ class properties:
             # _T
             st = self.fluid_class.st_t(T)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p, T')
+            # Return saved state when no input
+            return self.st
         
         # Convert from SI to specified units system
         return self.unit_converter.convert(st,prop = 'st', to_from = 'from_SI')
@@ -1051,8 +1068,8 @@ class properties:
             # h-s
             x = self.fluid_class.x_hs(h, s)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-h, p-s, h-s')
-        
+            x = self.x
+            
         # Convert from SI to specified units system
         return x
     
@@ -1105,8 +1122,8 @@ class properties:
             # h-s
             x = self.fluid_class.vx_hs(h, s)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-h, p-s, h-s')
-        
+            x = self.vx
+            
         # Convert from SI to specified units system
         return x
     
@@ -1165,8 +1182,9 @@ class properties:
             # h-s
             T = self.fluid_class.T_hs(h, s)
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: p-h, p-s, h-s, p-x')
-        
+            # Return saved state when no input
+            return self.T
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(T,prop = 'T', to_from = 'from_SI')
     
@@ -1232,8 +1250,9 @@ class properties:
             else:
                 raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: h-s')
         else:
-            raise Exception('Not enough input arguments or input arguments not a valid combination. Valid combinations: h-s')
-        
+            # Return saved state when no input
+            return self.p
+            
         # Convert from SI to specified units system
         return self.unit_converter.convert(p,prop = 'p', to_from = 'from_SI')
        
