@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Subclass to fluid_prop, implements IAPWSIF-97.
 
@@ -33,8 +32,6 @@ Basic properties for iapwsif97 class:
     Surface Tension                     (N/m)       st
 
 List of functions and code structure for iapwsif97 class:
-    Global settings set-functions
-       set_rho_r3_itt(itt)
        
    Updating functions
        update_pt(p, t)
@@ -45,16 +42,17 @@ List of functions and code structure for iapwsif97 class:
        update_hs(h, s)
    
    _pt - properties
-       v_pt(p, t)
-       h_pt(p, t)
-       u_pt(p, t)
-       s_pt(p, t)
-       cp_ptv
-       cv_pt(p, t)
-       w_pt(p, t)
-       rho_pt(p, t)
+       v_pt(p, t, high_accuracy = False)
+       h_pt(p, t, high_accuracy = False)
+       u_pt(p, t, high_accuracy = False)
+       s_pt(p, t, high_accuracy = False)
+       cp_pt(p, t, high_accuracy = False)
+       cv_pt(p, t, high_accuracy = False)
+       w_pt(p, t, high_accuracy = False)
+       rho_pt(p, t, high_accuracy = False)
        my_pt(p, t)
        tc_pt(p, t)
+       drhodpT(p, T, high_accuracy = True)
    
    _ph - properties
        v_ph(p, h)
@@ -199,9 +197,6 @@ from ... import utils as aux
 # Dependencies
 import numpy as np
 
-#### Global Settings ###
-rho_r3_itt = False # Chose to use v_r3 backward equations or use itteration
-
 ### Class ###
 class iapwsif97(fluid_prop):
     """
@@ -212,34 +207,6 @@ class iapwsif97(fluid_prop):
     
     @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
     """
-    
-    def set_rho_r3_itt(itt):
-        """
-        Set method to calculate rho/v in region 3
-        
-        True = use itteration (higher accuracy)
-        False = use v_pt function from SR5-05 suplementary release (default)
-        
-        This is a global setting, and will affect all objects?
-        
-        Parameters
-        ----------
-        itt:      boolean     -
-
-        Returns
-        -------
-        None.
-        """
-        #Region 3 uses p-rho to calculate properties, no backward eqation for
-        #rho available i original iapwsif97, however a suplementary release is 
-        #available, SR5-05, that defines a backward equation for v_pt in region 3.
-        #The accuracy of this equation is lower, therefore a option to use itteration
-        #is provided using this setting. v_pt-function is used to provide a initial
-        #guess for the itterations.
-            
-        global rho_r3_itt
-        
-        rho_r3_itt = itt
     
     def __init__(self, p = 1*1e5, T = 20+273.15, high_accuracy = False):
         """
@@ -342,7 +309,7 @@ class iapwsif97(fluid_prop):
 
             if self.high_accuracy_mode: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
-                
+
             self.v = 1/rho
             self.h = if97.h_r3(rho, T)
             self.u = if97.u_r3(rho, T)
@@ -739,7 +706,7 @@ class iapwsif97(fluid_prop):
     ### Properties as a function of p,T ###
         
     @staticmethod
-    def v_pt(p, T):
+    def v_pt(p, T, high_accuracy = False):
         """
         Specific volume IAPWS-IF97
     
@@ -747,6 +714,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
 
         Returns
         -------
@@ -764,7 +732,7 @@ class iapwsif97(fluid_prop):
             v = if97.v_r2(p, T)
         elif region == 3:
             v = if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 v = 1/if97.rho_r3(p, T, 1/v)
         elif region == 4:
             # Saturation properties. 
@@ -776,7 +744,7 @@ class iapwsif97(fluid_prop):
         return v
     
     @staticmethod
-    def h_pt(p, T):
+    def h_pt(p, T, high_accuracy = False):
         """
         Specific enthalpy IAPWS-IF97
         
@@ -784,6 +752,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
         
         Returns
         -------
@@ -800,7 +769,7 @@ class iapwsif97(fluid_prop):
             h = if97.h_r2(p, T)
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
             h = if97.h_r3(rho, T)
         elif region == 4:
@@ -813,7 +782,7 @@ class iapwsif97(fluid_prop):
         return h
     
     @staticmethod
-    def u_pt(p, T):
+    def u_pt(p, T, high_accuracy = False):
         """
         Specific internal energy IAPWS-IF97
     
@@ -821,6 +790,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
 
         Returns
         -------
@@ -838,7 +808,7 @@ class iapwsif97(fluid_prop):
             u = if97.u_r2(p, T)
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
             u = if97.u_r3(rho, T)
         elif region == 4:
@@ -851,7 +821,7 @@ class iapwsif97(fluid_prop):
         return u
     
     @staticmethod
-    def s_pt(p, T):
+    def s_pt(p, T, high_accuracy = False):
         """
         Specific entropy IAPWS-IF97
         
@@ -859,6 +829,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
         
         Returns
         -------
@@ -876,7 +847,7 @@ class iapwsif97(fluid_prop):
             s = if97.s_r2(p, T)
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
             s = if97.s_r3(rho, T)
         elif region == 4:
@@ -889,7 +860,7 @@ class iapwsif97(fluid_prop):
         return s
     
     @staticmethod
-    def cp_pt(p, T):
+    def cp_pt(p, T, high_accuracy = False):
         """
         Specific isobaric heat capacity IAPWS-IF97
         
@@ -897,6 +868,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
         
         Returns
         -------
@@ -914,7 +886,7 @@ class iapwsif97(fluid_prop):
             cp = if97.cp_r2(p, T)
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
             cp = if97.cp_r3(rho, T)
         elif region == 4:
@@ -927,7 +899,7 @@ class iapwsif97(fluid_prop):
         return cp
     
     @staticmethod
-    def cv_pt(p, T):
+    def cv_pt(p, T, high_accuracy = False):
         """
         Specific isochoric heat capacity IAPWS-IF97
         
@@ -935,6 +907,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
         
         Returns
         -------
@@ -952,7 +925,7 @@ class iapwsif97(fluid_prop):
             cv = if97.cv_r2(p, T)
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
             cv = if97.cv_r3(rho, T)
         elif region == 4:
@@ -965,7 +938,7 @@ class iapwsif97(fluid_prop):
         return cv
     
     @staticmethod
-    def w_pt(p, T):
+    def w_pt(p, T, high_accuracy = False):
         """
         Speed of sound IAPWS-IF97
         
@@ -973,6 +946,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
         
         Returns
         -------
@@ -990,7 +964,7 @@ class iapwsif97(fluid_prop):
             w = if97.w_r2(p, T)
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise rho
+            if high_accuracy: # if this option is set, itterate a more precise rho
                 rho = if97.rho_r3(p, T, rho)
             w = if97.w_r3(rho, T)
         elif region == 4:
@@ -1003,7 +977,7 @@ class iapwsif97(fluid_prop):
         return w
     
     @staticmethod
-    def rho_pt(p, T):
+    def rho_pt(p, T, high_accuracy = False):
         """
         Density IAPWS-IF97
     
@@ -1011,6 +985,7 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         T:      double  temperature (K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
 
         Returns
         -------
@@ -1028,7 +1003,7 @@ class iapwsif97(fluid_prop):
             v = if97.v_r2(p, T)
         elif region == 3:
             v = if97_vpt3.v_pt(p, T)
-            if rho_r3_itt: # if this option is set, itterate a more precise v
+            if high_accuracy: # if this option is set, itterate a more precise v
                 v = 1/if97.rho_r3(p, T, 1/v)
         elif region == 4:
             # Saturation properties. 
@@ -1063,7 +1038,7 @@ class iapwsif97(fluid_prop):
         # Check if within valid region
         if f08.region_my_pt(p, T) :
             
-            rho = iapwsif97.rho_pt(p,T)
+            rho = iapwsif97.rho_pt(p,T, high_accuracy = True)
             
             # Check if critical enhancement is needed or not...
             if f08.crit_enhance_trho(T,rho):
@@ -1071,17 +1046,9 @@ class iapwsif97(fluid_prop):
                 # These will therefore not match with validation tables in the iapwsf08 release. The release however suggest to skip the
                 # critical enhancement all together for greater speed. It is still used in this implementation but will give a warning.
                 
-                # critical enhancement is only active within region 3.
-                #p_rho = lambda rho: if97.p_r3(rho, T) 
-                
                 # determine derivative drho/dp at constant temperature
-                dp = 100 # Pa, discrete length of derivative
-                drhodpT = (iapwsif97.rho_pt(p+dp/2,T)-iapwsif97.rho_pt(p-dp/2,T))/dp
-                
-                # drho/dp at reference temperature
-                #Tr = global_property.Tref_f08 #K
-                #drhodpTr = (iapwsif97.rho_pt(p+dp/2,Tr)-iapwsif97.rho_pt(p-dp/2,Tr))/dp
-                
+                drhodpT = iapwsif97.drhodpT(p, T)
+            
                 drhodpTr = f11.sigma_tr(rho) # use function provided in iapwsf11 instead
                 
                 my = f08.my_trhosigma(T, rho, drhodpT, drhodpTr)
@@ -1114,24 +1081,14 @@ class iapwsif97(fluid_prop):
         # Check if within valid region
         if f11.region_tc_pt(p, T) :
 
-            rho = iapwsif97.rho_pt(p,T)
-            cp = iapwsif97.cp_pt(p, T)
-            cv = iapwsif97.cv_pt(p, T)
+            rho = iapwsif97.rho_pt(p,T, high_accuracy = True)
+            cp = iapwsif97.cp_pt(p, T, high_accuracy = True)
+            cv = iapwsif97.cv_pt(p, T, high_accuracy = True)
             my = f08.my_trho(T, rho) # calculate my without critical enhancement as is done in iapwsif11 verifications
-
-            # determine derivative drho/dp at constant temperature
-            dp = 100 # Pa, discrete length of derivative
             
-            if p == global_property.p_r123_upper_boundary or p == global_property.p_r5_upper_boundary and T > global_property.T_boundary_25:
-                # On region boundary, do backward derivative
-                drhodpT = (iapwsif97.rho_pt(p,T)-iapwsif97.rho_pt(p-dp,T))/dp
-            elif p == global_property.p_min:
-                # On region boundary, do forward derivative
-                drhodpT = (iapwsif97.rho_pt(p+dp,T)-iapwsif97.rho_pt(p,T))/dp
-            else:
-                # Centeral derivative
-                drhodpT = (iapwsif97.rho_pt(p+dp/2,T)-iapwsif97.rho_pt(p-dp/2,T))/dp
-                
+            # determine derivative drho/dp at constant temperature
+            drhodpT = iapwsif97.drhodpT(p, T)
+            
             # drho/dp at reference temperature
             drhodpTr = f11.sigma_tr(rho)
                 
@@ -1143,6 +1100,35 @@ class iapwsif97(fluid_prop):
             
         return tc
         
+    def drhodpT(p, T, high_accuracy = True):
+        """
+        Calculates the derivative drho / dp @ T = const. 
+        Itteration on rho is activated by default.
+        
+        Parameters
+        ----------
+        p:                  double  pressure (Pa).
+        T:                  double  temperature (K).
+        high_accuracy :     boolean itterate rho (optional, Default = True)
+
+        Returns
+        -------
+        double  drhodpT.
+
+        """
+        # determine derivative drho/dp at constant temperature
+        dp = 100 # Pa, discrete length of derivative
+        if p == global_property.p_r123_upper_boundary or p == global_property.p_r5_upper_boundary and T > global_property.T_boundary_25:
+            # On region boundary, do backward derivative
+            drhodpT = (iapwsif97.rho_pt(p,T, high_accuracy)-iapwsif97.rho_pt(p-dp,T, high_accuracy))/dp
+        elif p == global_property.p_min:
+            # On region boundary, do forward derivative
+            drhodpT = (iapwsif97.rho_pt(p+dp,T,high_accuracy)-iapwsif97.rho_pt(p,T,high_accuracy))/dp
+        else:
+            # Centeral derivative
+            drhodpT = (iapwsif97.rho_pt(p+dp/2,T,high_accuracy)-iapwsif97.rho_pt(p-dp/2,T,high_accuracy))/dp
+            
+        return drhodpT
     
     ### Properties as a function of p,h ###
     
@@ -3634,7 +3620,7 @@ class iapwsif97(fluid_prop):
             # determine derivative drho/dp at constant temperature
             dp = 100 # Pa, discrete length of derivative
             # one sided derivative to make sure density in liquid-state
-            drhodpT = (iapwsif97.rho_pt(p+dp+1,T)-iapwsif97.rho_pt(p+1,T))/dp
+            drhodpT = (iapwsif97.rho_pt(p+dp+1,T, high_accuracy = True)-iapwsif97.rho_pt(p+1,T, high_accuracy = True))/dp
                 
             # drho/dp at reference temperature
             drhodpTr = f11.sigma_tr(rho)
@@ -3680,7 +3666,7 @@ class iapwsif97(fluid_prop):
             # determine derivative drho/dp at constant temperature
             dp = 100 # Pa, discrete length of derivative
             # one sided derivative to make sure density in liquid-state
-            drhodpT = (iapwsif97.rho_pt(p-1,T)-iapwsif97.rho_pt(p-dp-1,T))/dp
+            drhodpT = (iapwsif97.rho_pt(p-1,T, high_accuracy = True)-iapwsif97.rho_pt(p-dp-1,T, high_accuracy = True))/dp
                 
             # drho/dp at reference temperature
             drhodpTr = f11.sigma_tr(rho)
@@ -4419,7 +4405,7 @@ class iapwsif97(fluid_prop):
             # determine derivative drho/dp at constant temperature
             dp = 100 # Pa, discrete length of derivative
             # one sided derivative to make sure density in liquid-state
-            drhodpT = (iapwsif97.rho_pt(p+dp+1,T)-iapwsif97.rho_pt(p+1,T))/dp
+            drhodpT = (iapwsif97.rho_pt(p+dp+1,T, high_accuracy = True)-iapwsif97.rho_pt(p+1,T, high_accuracy = True))/dp
                 
             # drho/dp at reference temperature
             drhodpTr = f11.sigma_tr(rho)
@@ -4464,7 +4450,7 @@ class iapwsif97(fluid_prop):
             # determine derivative drho/dp at constant temperature
             dp = 100 # Pa, discrete length of derivative
             # one sided derivative to make sure density in liquid-state
-            drhodpT = (iapwsif97.rho_pt(p-1,T)-iapwsif97.rho_pt(p-dp-1,T))/dp
+            drhodpT = (iapwsif97.rho_pt(p-1,T, high_accuracy = True)-iapwsif97.rho_pt(p-dp-1,T, high_accuracy = True))/dp
                 
             # drho/dp at reference temperature
             drhodpTr = f11.sigma_tr(rho)

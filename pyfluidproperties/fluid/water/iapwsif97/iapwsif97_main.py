@@ -2414,7 +2414,7 @@ def w_r3(rho,T):
     
     return ((2*delta*phi_r3_delta(delta, tau)+(delta**2)*phi_r3_deltadelta(delta, tau)-((delta*phi_r3_delta(delta, tau)-delta*tau*phi_r3_deltatau(delta, tau))**2/((tau**2)*phi_r3_tautau(delta, tau))))*R*T)**.5
 
-def rho_r3(p,T, rho_init = 0.0):
+def rho_r3(p,T, rho_init = 0.0, initial_guess_accuracy = .025):
     """
     Density for region 3 IAPWS-IF97
     Itteration...
@@ -2423,7 +2423,7 @@ def rho_r3(p,T, rho_init = 0.0):
     ----------
     p:            double              pressure (Pa).
     T:            double              temperature (K).
-    p:            double              initial guess density (kg/m^3) (optional).
+    rho_init:     double              initial guess density (kg/m^3) (optional).
     
     Returns
     -------
@@ -2437,13 +2437,13 @@ def rho_r3(p,T, rho_init = 0.0):
         rho_0 = 1.0 # kg/m^3
         rho_1 = 1000.0 # kg/m^3
     else:
-        # set a range of +-2.5% of initial guess
-        rho_0 = .975*rho_init
-        rho_1 = 1.025*rho_init
+        # set a range +-accuracy around initial guess
+        rho_0 = (1-initial_guess_accuracy)*rho_init
+        rho_1 = (1+initial_guess_accuracy)*rho_init
         
     p_rho = lambda rho: p_r3(rho, T)
-    rho = aux.bisection(p_rho, rho_0, rho_1, p, global_property.itt_tol, global_property.itt_max)
-   
+    rho = aux.bisection(p_rho, rho_0, rho_1, p, global_property.itt_tol_r3, global_property.itt_max_r3)
+       
     return rho
 
 """

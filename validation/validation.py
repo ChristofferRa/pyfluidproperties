@@ -340,19 +340,10 @@ def main():
             rho = float(verification_input_data[i,7])
             
             p = if97.p_r3(rho,T)
-            if if97.find_region(p, T) == 3:
-                w_prop.set_rho_r3_itt(True) # itterate rho for region 3 to ger higher accuracy
-
-                my = w.my_pt(p, T)
-                tc = w.tc_pt(p, T)
-                
-                w_prop.set_rho_r3_itt(False)
-            else:
-                
-                my = 0.0
-                tc = 0.0
-                print('Warning, trho_r3, not region 3...')
             
+            my = w.my_pt(p, T)
+            tc = w.tc_pt(p, T)
+                
             verification_tbls = np.append(verification_tbls,[[  verification_input_data[i,0],verification_input_data[i,1], p*10**-6, T, 0, 0, 0, 0, 0, 0, rho,  my, tc,0,region]],axis = 0)
         
         ### property sub functions
@@ -469,16 +460,6 @@ def main():
             T = float(verification_input_data[i,4])
             rho = float(verification_input_data[i,7])
             
-            """
-            #Many of the validation data-points is outside iapwsif97 valid region
-            #hence the need to access the function directly.
-            
-            rho_p = lambda pp: w.rho_pt(pp, T)
-            p = aux.bisection(rho_p,10,99*10**6,rho,0.000001,1000)
-            region = if97.find_region(p, T)
-            
-            my = w.my_pt(p, T)
-            """
             my = f08.my_trho(T, rho)
             verification_tbls = np.append(verification_tbls,[[  verification_input_data[i,0],verification_input_data[i,1], p*10**-6, T, 0, 0, 0, 0, 0, 0, rho,  my, 0,0,region]],axis = 0)
         
