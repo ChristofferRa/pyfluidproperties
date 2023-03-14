@@ -1217,7 +1217,7 @@ class properties:
         # Inputs converted to SI for use by fluid-class
         for key, arg in kwargs.items():
             if key == 'T':
-                T = arg
+                T = self.unit_converter.convert(arg, prop = 'T', to_from = 'to_SI')
             elif key == 'h':
                 h = self.unit_converter.convert(arg, prop = 'h', to_from = 'to_SI')
             elif key == 's':
