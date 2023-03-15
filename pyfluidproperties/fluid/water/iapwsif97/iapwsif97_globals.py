@@ -13,7 +13,7 @@ itt_tol = 1e-6                                      # -
 itt_max = 100
 
 # Region 3 itterations
-itt_tol_r3 = 1e-5
+itt_tol_r3 = 1e-6
 itt_max_r3 = 100
 
 ##########################
