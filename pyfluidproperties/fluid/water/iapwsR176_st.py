@@ -12,7 +12,7 @@ List of functions and code structure:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com
 """
 
-from .iapwsif97 import iapwsif97_globals as global_property
+from .iapwsif97 import iapwsif_globals as global_property
 
 def region_st_t(t):
     """

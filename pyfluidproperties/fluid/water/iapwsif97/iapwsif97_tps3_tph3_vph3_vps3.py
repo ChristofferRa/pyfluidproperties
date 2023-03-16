@@ -35,7 +35,7 @@ List of functions and code structure:
 @author: Christoffer Rappmann, christoffer.rappmann@gmail.com  
 """
 # Global Constants
-from . import iapwsif97_globals as global_property
+from .iapwsif97_globals import iapwsif_globals as global_property
 
 import numpy as np
             

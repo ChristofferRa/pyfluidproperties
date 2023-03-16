@@ -93,9 +93,7 @@ List of functions and code structure:
             cp_r3(rho,T)
             cv_r3(rho,T)
             w_r3(rho,T)
-            
-            rho_r3(p,T, rho_init = 0.0)
-            
+                        
         Backward equations
             -
     
@@ -146,7 +144,7 @@ from .iapwsif97_tps3_tph3_vph3_vps3 import p_3sat_h, p_3sat_s
 # Helper functions
 from .... import utils as aux
 # Global Constants
-from . import iapwsif97_globals as global_property
+from .iapwsif97_globals import iapwsif_globals as global_property
 
 # Specific gas constant
 R = global_property.R #J/kg/K      Eq. 1
@@ -2414,37 +2412,6 @@ def w_r3(rho,T):
     
     return ((2*delta*phi_r3_delta(delta, tau)+(delta**2)*phi_r3_deltadelta(delta, tau)-((delta*phi_r3_delta(delta, tau)-delta*tau*phi_r3_deltatau(delta, tau))**2/((tau**2)*phi_r3_tautau(delta, tau))))*R*T)**.5
 
-def rho_r3(p,T, rho_init = 0.0, initial_guess_accuracy = .025):
-    """
-    Density for region 3 IAPWS-IF97
-    Itteration...
-    
-    Parameters
-    ----------
-    p:            double              pressure (Pa).
-    T:            double              temperature (K).
-    rho_init:     double              initial guess density (kg/m^3) (optional).
-    
-    Returns
-    -------
-    double  density (kg/m^3)
-
-    """
-    
-    # check if initial guess is provided...
-    if rho_init == 0.0:
-        # set a range bigger than the range of possible densities in region 3...
-        rho_0 = 1.0 # kg/m^3
-        rho_1 = 1000.0 # kg/m^3
-    else:
-        # set a range +-accuracy around initial guess
-        rho_0 = (1-initial_guess_accuracy)*rho_init
-        rho_1 = (1+initial_guess_accuracy)*rho_init
-        
-    p_rho = lambda rho: p_r3(rho, T)
-    rho = aux.bisection(p_rho, rho_0, rho_1, p, global_property.itt_tol_r3, global_property.itt_max_r3)
-       
-    return rho
 
 """
     Region 4
