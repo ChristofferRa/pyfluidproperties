@@ -53,7 +53,7 @@ def secant(func,x0,x1,a, tolerance = 0.0001, max_itt = 100):
         x1 = x
         
         itt = itt + 1
-        if itt >= max_itt and np.abs(func(x)-a)>=tolerance*10:
+        if itt >= max_itt and np.abs(func(x)-a)>=tolerance*50:
             print(f'\nWarning convergence target not achievied, Error = {(np.abs(func(x)-a))}')
 
     return x
@@ -99,7 +99,7 @@ def bisection(func, x0,x1,a, tolerance = 0.001, max_itt = 100):
             x1 = x
             
         itt = itt + 1
-        if itt >= max_itt and np.abs(func(x)-a)>=tolerance*10:
+        if itt >= max_itt and np.abs(func(x)-a)>=tolerance*50:
             print(f'\nWarning convergence target not achievied, Error = {(np.abs(func(x)-a))}')
         
     return x
