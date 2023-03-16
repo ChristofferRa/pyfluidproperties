@@ -101,8 +101,8 @@ List of functions and code structure for iapwsif97 class:
        rho_tx(t, x)
        
    Temperature, pressure, enthalpy backward functions
-       T_ph(p, h)
-       T_ps(p, s)
+       T_ph(p, h, high_accuracy = False)
+       T_ps(p, s, high_accuracy = False)
        T_hs(h, s)
        
        Tsat_p(p)
@@ -154,18 +154,15 @@ List of functions and code structure for iapwsif97 class:
         st_t(t)
         st_p(p)
        
-Known bugs:
-    - 
 Not yet implemented/todo:
     -
 Future uppgrades:
     - Change itteration method to ITP or Illinois to speed upp?
     - Tsat_hs, lower accuracy for pressures close to p_crit. mainly in region 3 p>16MPa, double itterations, possible to do it a better way?
-    - high accuracy-mode, itterate instead of using backwards equations. (gives higher accuracy) use backward equation for initial guess. implemented for _pt functions in region 3...
+    - high accuracy-mode, add t_ph/t_ps for region 3, t_hs, p_hs?
     - make function-call in class for meta-stable region 2...
     - make function for gamma/kappa and calculate two-phase values correct
     - add two-phase correlation for speed of sound
-    - update_hs function
 Bugs:
     - find_region_hs, uses fitted polynominals for region boundaries. som inacuracies may show h-s point as outside region when not.
 
@@ -176,7 +173,7 @@ from pyfluidproperties.fluid.fluid_prop import fluid_prop
 
 # sub functions
 # Global Constants
-from .iapwsif97 import iapwsif97_globals as global_property
+from .iapwsif97 import iapwsif_globals as global_property
 # Main iapwsif97-implementation
 from .iapwsif97 import iapwsif97_main as if97
 # Iapwsif97 suplementary release 5, IAPWS SR5-05(2016)
@@ -185,6 +182,8 @@ from .iapwsif97 import iapwsif97_vpt3 as if97_vpt3
 from .iapwsif97 import iapwsif97_tps3_tph3_vph3_vps3 as if97_tvphps
 # Iapws.if97 suplementary release 2 and 4, IAPWS SR2-01(2014) and SR4-04(2014)
 from .iapwsif97 import iapwsif97_phs as if97_phs
+# Itteration methods for t_ph and t_ps
+from .iapwsif97 import iapwsif97_itterative_methods as if97_itt
 # iapwsf08, viscosity of ordinary water, R12-08
 from . import iapwsf08_my as f08
 # iapwsf11, thermal conductivity of ordinary water, R15-11
@@ -308,7 +307,7 @@ class iapwsif97(fluid_prop):
             rho = 1/if97_vpt3.v_pt(p, T)
 
             if self.high_accuracy_mode: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
 
             self.v = 1/rho
             self.h = if97.h_r3(rho, T)
@@ -635,7 +634,7 @@ class iapwsif97(fluid_prop):
         
         if region != 4:
             # Region 1,2,3,5, Not saturated
-            iapwsif97.update_pt(self,p,iapwsif97.T_ph(p,h))
+            iapwsif97.update_pt(self,p,iapwsif97.T_ph(p,h,self.high_accuracy_mode))
         else:
             # Region 4, saturation properties, 2-phase            
     
@@ -663,7 +662,7 @@ class iapwsif97(fluid_prop):
         
         if region != 4:
             # Region 1,2,3,5, Not saturated
-            iapwsif97.update_pt(self,p,iapwsif97.T_ps(p,s))
+            iapwsif97.update_pt(self,p,iapwsif97.T_ps(p,s,self.high_accuracy_mode))
         else:
             # Region 4, saturation properties, 2-phase
             
@@ -733,7 +732,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             v = if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                v = 1/if97.rho_r3(p, T, 1/v)
+                v = 1/if97_itt.rho_r3(p, T, 1/v)
         elif region == 4:
             # Saturation properties. 
             # Will not be entered this way
@@ -770,7 +769,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
             h = if97.h_r3(rho, T)
         elif region == 4:
             # Saturation properties. 
@@ -809,7 +808,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
             u = if97.u_r3(rho, T)
         elif region == 4:
             # Saturation properties. 
@@ -848,7 +847,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
             s = if97.s_r3(rho, T)
         elif region == 4:
             # Saturation properties. 
@@ -887,7 +886,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
             cp = if97.cp_r3(rho, T)
         elif region == 4:
             # Saturation properties. 
@@ -926,7 +925,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
             cv = if97.cv_r3(rho, T)
         elif region == 4:
             # Saturation properties. 
@@ -965,7 +964,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             rho = 1 / if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise rho
-                rho = if97.rho_r3(p, T, rho)
+                rho = if97_itt.rho_r3(p, T, rho)
             w = if97.w_r3(rho, T)
         elif region == 4:
             # Saturation properties. 
@@ -1004,7 +1003,7 @@ class iapwsif97(fluid_prop):
         elif region == 3:
             v = if97_vpt3.v_pt(p, T)
             if high_accuracy: # if this option is set, itterate a more precise v
-                v = 1/if97.rho_r3(p, T, 1/v)
+                v = 1/if97_itt.rho_r3(p, T, 1/v)
         elif region == 4:
             # Saturation properties. 
             # Will not be entered this way
@@ -2303,7 +2302,7 @@ class iapwsif97(fluid_prop):
     ### Temperature, pressure backward functions ###
     
     @staticmethod
-    def T_ph(p, h):
+    def T_ph(p, h, high_accuracy = False):
         """
         Temperature given p,h IAPWS-IF97
         
@@ -2311,35 +2310,46 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         h:      double  enthalpy (J/kg).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
         
         Returns
         -------
         double  Temperature (K)
         """
-
+        # p_rho = lambda rho: p_r3(rho, T)
+        # rho = aux.bisection(p_rho, rho_0, rho_1, p, global_property.itt_tol_r3, global_property.itt_max_r3)
         region = if97.find_region_ph(p, h)
 
         if region == -1:
             print(f'T_ph, out of bounds. p = {p*10**-6:.3f} MPa, h = {h*10**-3:.3f} kJ/kg')
             T = np.nan
         elif region == 1:
-            T = if97.t_ph_r1(p, h)
+            if high_accuracy:
+                T = if97_itt.t_ph_r1_itt(p, h)
+            else:    
+                T = if97.t_ph_r1(p, h)
         elif region == 2:
-            T = if97.t_ph_r2(p, h)
+            if high_accuracy:
+                T = if97_itt.t_ph_r2_itt(p, h)
+            else:
+                T = if97.t_ph_r2(p, h)
         elif region == 3:
             # IAPWS SR3-03(2014)
-            T = if97_tvphps.t_3_ph(p, h)
+            if high_accuracy:
+                T = if97_itt.t_ph_r3_itt(p, h)
+            else:
+                T = if97_tvphps.t_3_ph(p, h)
         elif region == 4:
             # Saturation properties. 
             T = if97.t_sat_p_r4(p)
         elif region == 5:
-            # No backward equation for region 5, itterate
+            # No backward equation for region 5, always itterate
             T = if97.t_ph_r5(p, h)
         
         return T
     
     @staticmethod
-    def T_ps(p, s):
+    def T_ps(p, s, high_accuracy = False):
         """
         Temperature given p,s IAPWS-IF97
         
@@ -2347,6 +2357,8 @@ class iapwsif97(fluid_prop):
         ----------
         p:      double  pressure (Pa).
         s:      double  entropy (J/kg/K).
+        high_accuracy :     boolean itterate rho in region 3 (optional, Default = True)
+
         
         Returns
         -------
@@ -2359,17 +2371,26 @@ class iapwsif97(fluid_prop):
         if region == -1:
             print(f'T_ps, out of bounds. p = {p*10**-6:.3f} MPa, s = {s*10**-3:.3f} kJ/kg/K')
         elif region == 1:
-            T = if97.t_ps_r1(p, s)
+            if high_accuracy:
+                T = if97_itt.t_ps_r1_itt(p, s)
+            else:
+                T = if97.t_ps_r1(p, s)
         elif region == 2:
-            T = if97.t_ps_r2(p, s)
+            if high_accuracy:
+                T = if97_itt.t_ps_r2_itt(p, s)
+            else:
+                T = if97.t_ps_r2(p, s)
         elif region == 3:
             # IAPWS SR3-03(2014)
-            T = if97_tvphps.t_3_ps(p, s)
+            if high_accuracy:
+                T = if97_itt.t_ps_r3_itt(p, s) # Not implemented....
+            else:
+                T = if97_tvphps.t_3_ps(p, s)
         elif region == 4:
             # Saturation properties. 
             T = if97.t_sat_p_r4(p)
         elif region == 5:
-            # No backward equation for region 5, itterate
+            # No backward equation for region 5, always itterate
             T = if97.t_ps_r5(p, s)
         
         return T
