@@ -48,7 +48,7 @@ from pyfluidproperties import properties, fluid_id, unit_sys
 ##### Initializing:
 ```
 # Initialize object by choosing fluid and unit-system
-my_fluid = properties(fluid = fluid_id.Water, unit_sys = unit_sys.SI_MPa_kJ)
+my_fluid = properties(fluid = fluid_id.Water, unit_system = unit_sys.SI_bar_kJ)
 ```
 ##### Update fluid state:
 ```
