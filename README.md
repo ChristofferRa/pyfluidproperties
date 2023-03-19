@@ -43,12 +43,12 @@ $ python setup.py install
 ### Workflow
 ##### Importing:
 ```
-from pyfluidproperties import properties
+from pyfluidproperties import properties, fluid_id, unit_sys
 ```
 ##### Initializing:
 ```
 # Initialize object by choosing fluid and unit-system
-my_fluid = properties(fluid = "H2O", unit_system = 'SI_bar_kJ')
+my_fluid = properties(fluid = fluid_id.Water, unit_sys = unit_sys.SI_MPa_kJ)
 ```
 ##### Update fluid state:
 ```
@@ -58,25 +58,25 @@ print(my_fluid)
 ```
 ##### Output:
 ```
-Fluid:			Water (H2O)
-Unit system:	SI_bar_kJ
+Fluid:              Water (H2O)
+Unit system:        SI_bar_kJ
 
-Pressure,		p = 10.000000	bar(a)
-Temperature,	T = 200.000000	degC
+Pressure            p =   10.000000  bar(a)
+Temperature         T =  200.000000  degC
 
-region =	2
+region =  2
 
-Specific Volume,						v  =		0.20600364978		m^3/kg
-Specific Enthalpy,						h  =		2828.26753759806	kJ/kg
-Specific Internal Energy,				u  =		2622.26388781406	kJ/kg
-Specific Entropy,						s  =		6.69548824267		kJ/kg/C
-Specific Isobaric heat capacity,		cp =		2.42884622458	    kJ/kg/C
-Specific Isochoric heat capacity,		cv =		1.75261905115		kJ/kg/C
-Speed of sound,							w  =		517.31561087015		m/s
-Vapor mass fraction,					x  =		1.00000000000		(-)
-Dynamic Viscosity,						my =		0.00001587601		Pa*s
-Thermal Conductivity,					tc =		0.03631225226		W/m/K
-Surface Tension,						st =		nan		            N/m
+Specific Volume                     v =      0.206004  m^3/kg
+Specific Enthalpy                   h =   2828.267538  kJ/kg
+Specific Internal Energy            u =   2622.263888  kJ/kg
+Specific Entropy                    s =      6.695488  kJ/kg/C
+Specific Isobaric heat capacity    cp =      2.428846  kJ/kg/C
+Specific Isochoric heat capacity   cv =      1.752619  kJ/kg/C
+Speed of sound                      w =    517.315611  m/s
+Vapor mass fraction                 x =      1.000000  (-)
+Dynamic Viscosity                  my =      0.000016  Pa*s
+Thermal Conductivity               tc =      0.036312  W/m/K
+Surface Tension                    st =           nan  N/m
 ```
 ##### Accessing properties
 Accessing property value with: fluid_object.*, replace * with one of the basic property letters:
@@ -86,14 +86,14 @@ v = 10 # m/s
 p_dyn = 0.5*my_fluid.rho*v**2
 ```
 ##### Calculating a single property
-Calculate and use single properties with "get_*"-functions, just change * to one of the basic properties letters:
+Calculate and use single properties with ".get_*"-functions, just change * to one of the basic properties letters:
 ```
 # Enthalpy for saturated steam at p = 5 bar(a)
 h = my_fluid.get_h(p = 5, x = 1.0)
 ```
 
 ### Available functions
-Use either as an object containing all the properties or access them individually using the provided get_* functions. Each function should be called with two keywords/properties to define a fluid state. Valid combination depends on function, all possible combinations are presented for each function below.
+Use either as an object containing all the properties or access them individually using the provided .get_* functions. Each function should be called with two keywords/properties to define a fluid state. Valid combination depends on function, all possible combinations are presented for each function below.
 ##### Valid keywords/property
 | Keyword  | Description|
 | ------    | ------    |
@@ -104,7 +104,7 @@ Use either as an object containing all the properties or access them individuall
 |rho          | Density  |
 ##### As and object, Calculate all properties at once
 Update intialized object with all fluid properties for a new fluid state
-*.update_pt(kwargs).
+*.update(kwargs).
 ###### Valid keyword-combinations
 - Pressure - Temperature, p-T
 - Pressure - Enthalpy, p-h
@@ -119,6 +119,7 @@ my_fluid.update_pt(p = 5, h = 500)
 ```
 
 ##### .get_* functions, Calculate Individual properties
+
 Calculate invidual properties using these functions and keyword combinations. 
 For saturation properties use x = 0.0 for liquid and x = 1.0 for vapor.
 | Function  | Description               | p-T   | p-h   | p-s   | p-rho | h-s   | p-x | T-x |
@@ -140,24 +141,19 @@ For saturation properties use x = 0.0 for liquid and x = 1.0 for vapor.
 |*.get_p    | Pressure                  | -     | x     | x     | -     | x     | - | x  |
 
 ###### Ex: Viscosity at 5 bar(a) and 500 kJ/kg
+
 ```
 my = my_fluid.my(p = 5, h = 500)
 ```
-##### Misc
-There are functions that return available fluids and unit-systems. These are static functions and can be used without an instance of the fluid-object. 
+##### Fluids and Unit systems 
+
+Classes providing type-hints for available fluids and unit systems are available, just import 'fluid_id' and 'unit_sys' from pyfluidproperties
 ###### Ex:
-```
-from pyfluidproperties import properties as pyprop
-print(pyprop.get_fluids)
-print(pyprop.get_unit_systems)
-```
-###### Output:
-```
-```
-### Unit systems
-Several different unit systems are supported. Unit-system is choosen when object is initialized with "unit_system"-keyword. 
+
+![type hints](pics/type_hints.png)
 
 ##### Available unit systems
+
 | Description                       | Unit      |  Unit         |  Unit     | Unit |
 | ------                            | ------    | ------        | ------    | ------    |
 | Unit-system                       | SI        |  SI_bar_kJ    |SI_MPa_kJ  | US        |
@@ -176,22 +172,29 @@ Several different unit systems are supported. Unit-system is choosen when object
 | Surface Tension                   | N/m       | N/m       | N/m       | lb/inch
 
 ###### Ex: Initializing Water with US-units:
+
 ```
-fluid = properties(fluid = "H2O", unit_system = 'US')
+my_fluid = properties(fluid = fluid_id.Water, unit_system = unit_sys.US)
 ```
 
 ### Verification, Validation and accuracy
 Performed validations are described here. All validation tests can be found in the "validation"-folder of this repository. Calculated fluid states are compared to NIST-Webbook if available.
-#### Water - IAPWSIF-97
+#### Water - IAPWSIF97
+
 ##### Verification
-Water properties using IAPWIF97 is validated against verification-tables available in IAPWSIF97-releases. All provided validation tables in used IAPWSIF-releases match calculated values with pyfluidproperties, with the following exceptions:  
+
+Water properties using IAPWIF97 is validated against verification-tables available in [IAPWSIF97-releases](http://iapws.org/release.html). All provided validation tables in used IAPWSIF-releases match calculated values with pyfluidproperties, with the following exceptions:  
 - Viscosity: Tables with "critical enhancement" near the critical point. (Max 1.5%)
 - Thermal Conductivity near the critical point. (Max 0.002%)
 
 The difference is very small. The method for calculating Viscosity only provides verification-tables calculated with IAPWSIF95. pyfluidprop uses IAPWSIF97 which has lower accuracy compare to IAPWSIF95, this difference account for the majority of the deviation. The difference for Thermal conductivity is explaind by different methods for calculating the derivative $$\frac{\mathrm \partial \rho}{\mathrm \partial p}|_{\bar{T}}$$
+
+This comparison is done automatically with "validation/verification_iapws.py" where the excepted output is checked. Running this file is a god way of verify the installation.
+
 ##### Validation and accuracy
-About 2200 fluid states spread out over the applicability range of IAPWSIF97, from 0.1 to 100 MPa and 300 to 2000 K, is compared to NIST (IAPWSIF95). The maximum error for each property is calculated and presented below. 
-| Input properties/combination  | T    | p    | rho  | v	| u	   | h    | s    | Cv   | Cp   | w    | my   | tc   |
+
+About 2200 fluid states spread out over the applicability range of IAPWSIF97, from 0.1 to 100 MPa and 300 to 2000 K, is compared to NIST (IAPWSIF95), the near critical region is excluded in this comparison. The maximum error for each property is calculated and presented below. 
+| Input properties/combination  | $$T$$    | $$p$$    | $$\rho$$  | $$\nu$$	| $$u$$	   | $$h$$    | $$s$$    | $$C_v$$   | $$C_p$$   | $$w$$    | $$\mu$$   | $$\lambda$$   |
 | ------                        |------|------|------|------|------|------|------|------|------|------|------|------|
 | Pressure-Temperature (p-T)    |0.00 %|0.00 %|0.07 %|0.07 %|0.03 %|0.03 %|0.02 %|0.66 %|0.80 %|0.52 %|0.11 %|0.14 %|	
 | Pressure-Enthalpy (p-h)       |0.02 %|0.00 %|0.07 %|0.07 %|0.08 %|0.08 %|0.08 %|0.67 %|0.76 %|0.55 %|0.12 %|0.13 %|
@@ -203,3 +206,13 @@ About 2200 fluid states spread out over the applicability range of IAPWSIF97, fr
 | Temperature - Mass fraction Vapor (T-x) x = 1.0|0.00 %|0.02 %|0.15 %|0.15 %|0.04 %|0.05 %|0.04 %|0.58 %|0.82 %|0.11 %|0.01 %|0.32 %|
 
 Accuracy data for all functions in the IAPWIF97 implementation, run "validation/validation_nist.py".
+
+##### Heat maps
+
+A even more comprehensive comparison to NIST-data has been performed. Where 250 000 fluid states evenly spread in the range 300 K < T < 1070, 0.1< p < 100 MPa is calculated. A heat map for specific volume ($$\nu$$) and isobaric heat capacity ($$C_p$$).  
+For heat maps for other properties, check [Validation-folder](https://github.com/ChristofferRa/pyfluidfroperties/tree/master/validation), to generate new heat maps use "validation\heat_map.py", fluid states to compare to have to be provided in csv-format.
+
+![Heat map for specific volume](pics/nist_comparison_IAPWSIF95_2.png)
+![Heat map for specific volume Zoomed](pics/nist_comparison_IAPWSIF95_2_near_crit.png)
+![Heat map for isobaric heat capacity](pics/nist_comparison_IAPWSIF95_8.png)
+![Heat map for isobaric heat capacity Zoomed](pics/nist_comparison_IAPWSIF95_8_near_crit.png)
