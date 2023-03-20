@@ -48,7 +48,7 @@ from pyfluidproperties import properties, fluid_id, unit_sys
 ##### Initializing:
 ```
 # Initialize object by choosing fluid and unit-system
-my_fluid = properties(fluid = fluid_id.Water, unit_system = unit_sys.SI_bar_kJ)
+my_fluid = properties(fluid = fluid_id.Water, unit_sys = unit_sys.SI_MPa_kJ)
 ```
 ##### Update fluid state:
 ```
@@ -187,7 +187,7 @@ Water properties using IAPWIF97 is validated against verification-tables availab
 - Viscosity: Tables with "critical enhancement" near the critical point. (Max 1.5%)
 - Thermal Conductivity near the critical point. (Max 0.002%)
 
-The difference is very small. The method for calculating Viscosity only provides verification-tables calculated with IAPWSIF95. pyfluidprop uses IAPWSIF97 which has lower accuracy compare to IAPWSIF95, this difference account for the majority of the deviation. The difference for Thermal conductivity is explaind by different methods for calculating the derivative $$\frac{\mathrm \partial \rho}{\mathrm \partial p}|_{\bar{T}}$$
+The difference is very small. The method for calculating Viscosity only provides verification-tables calculated with IAPWSIF95. pyfluidprop uses IAPWSIF97 which has lower accuracy compare to IAPWSIF95, this difference account for the majority of the deviation. The difference for Thermal conductivity is explaind by different methods for calculating the derivative $$\frac{\mathrm \partial \rho}{\mathrm \partial p}|_{\bar{T}}$$  
 
 This comparison is done automatically with "validation/verification_iapws.py" where the excepted output is checked. Running this file is a god way of verify the installation.
 
@@ -209,7 +209,7 @@ Accuracy data for all functions in the IAPWIF97 implementation, run "validation/
 
 ##### Heat maps
 
-A even more comprehensive comparison to NIST-data has been performed. Where 250 000 fluid states evenly spread in the range 300 K < T < 1070, 0.1< p < 100 MPa is calculated. A heat map for specific volume ($$\nu$$) and isobaric heat capacity ($$C_p$$).  
+A even more comprehensive comparison to NIST-data has been performed. Where 250 000 fluid states evenly spread in the range 300 K < T < 1070, 0.1< p < 100 MPa is calculated. A heat map for specific volume ($$\nu$$)  and isobaric heat capacity ($$C_p$$)  .  
 For heat maps for other properties, check [Validation-folder](https://github.com/ChristofferRa/pyfluidfroperties/tree/master/validation), to generate new heat maps use "validation\heat_map.py", fluid states to compare to have to be provided in csv-format.
 
 ![Heat map for specific volume](pics/nist_comparison_IAPWSIF95_2.png)
