@@ -16,6 +16,7 @@ All functions except: vx_ph(p, h), vx_ps(p, s), vx_hs(h, s) since these are not 
 from pyfluidproperties import iapwsif97 as w_prop
 import numpy as np
 import time
+from tqdm import tqdm
 
 def main():
     print('Validation of IAPWSIF97-class, comparing results to NIST(IAPWSIF95)\n\n')
@@ -96,7 +97,7 @@ def main():
     ##################################
     print('\nCalculating properties using _pt, _ph, _ps, _hs and _prho functions....')
     tic = time.perf_counter()
-    for i in range(0, len(nist_data)):
+    for i in tqdm(range(0, len(nist_data))):
         
         # update_pt & *_pt
         p = nist_data[i,1]*10**6 # Pa
@@ -130,8 +131,8 @@ def main():
         iapwsif_results_h_prho = np.append(iapwsif_results_h_prho, [[np.nan, p*10**-6, rho, np.nan, np.nan, w_prop.h_prho(p, rho)*10**-3, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]], axis = 0)
         
     # Saturation properties
-    print('Calculating saturation properties using _px, _Tx, L_p, V_p, L_T, V_T and sat_s functions....')
-    for j in range(0, len(nist_data_sat_liq)):
+    print('Calculating saturation properties using _px, _Tx, L_p, V_p, L_T, V_T and sat_s functions....\nLiquid calculations...')
+    for j in tqdm(range(0, len(nist_data_sat_liq))):
         # update_px & *L_p
         p = nist_data_sat_liq[j,1]*10**6
                 
@@ -153,8 +154,8 @@ def main():
         #psat_s(s)
         s = nist_data_sat_liq[j,6]*10**3
         iapwsif_results_sat_p = np.append(iapwsif_results_sat_p, [[np.nan, w_prop.psat_s(s)*10**-6, np.nan, np.nan, np.nan, np.nan, s*10**-3, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]], axis = 0)
-        
-    for j in range(0, len(nist_data_sat_vap)):    
+    print('Vapor calculations')
+    for j in tqdm(range(0, len(nist_data_sat_vap))):    
         # update_px & *V_p
         p = nist_data_sat_vap[j,1]*10**6
         
@@ -179,7 +180,7 @@ def main():
     
     # Check that liq and sat data contains equal amount of data-points
     if len(nist_data_sat_liq) == len(nist_data_sat_vap):
-        for k in range(0, len(nist_data_sat_vap)):
+        for k in tqdm(range(0, len(nist_data_sat_vap))):
             p = nist_data_sat_liq[k,1]*10**6
             
             w.update_px(p,x)
