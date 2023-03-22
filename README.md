@@ -43,12 +43,12 @@ $ python setup.py install
 ### Workflow
 ##### Importing:
 ```
-from pyfluidproperties import properties, fluid_id, unit_sys
+from pyfluidproperties import properties, unit_sys, fluid_id
 ```
 ##### Initializing:
 ```
 # Initialize object by choosing fluid and unit-system
-my_fluid = properties(fluid = fluid_id.Water, unit_sys = unit_sys.SI_MPa_kJ)
+my_fluid = properties(fluid = fluid_id.Water, unit_system = unit_sys.SI_bar_kJ)
 ```
 ##### Update fluid state:
 ```
@@ -115,7 +115,7 @@ Update intialized object with all fluid properties for a new fluid state
 
 ###### Ex:
 ```
-my_fluid.update_pt(p = 5, h = 500)
+my_fluid.update(p = 5, h = 500)
 ```
 
 ##### .get_* functions, Calculate Individual properties
@@ -143,7 +143,7 @@ For saturation properties use x = 0.0 for liquid and x = 1.0 for vapor.
 ###### Ex: Viscosity at 5 bar(a) and 500 kJ/kg
 
 ```
-my = my_fluid.my(p = 5, h = 500)
+my = my_fluid.get_my(p = 5, h = 500)
 ```
 ##### Fluids and Unit systems 
 
